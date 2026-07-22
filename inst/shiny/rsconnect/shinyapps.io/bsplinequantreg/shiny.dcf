@@ -1,0 +1,13 @@
+name: shiny
+title: shiny
+username: bsplinequantreg
+account: bsplinequantreg
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17632591
+bundleId: 12304264
+url: https://bsplinequantreg.shinyapps.io/shiny/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: app_lumo.R|app2.R|app21.R|app3.R
