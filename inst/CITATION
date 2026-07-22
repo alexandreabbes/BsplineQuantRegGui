@@ -1,0 +1,70 @@
+# inst/CITATION
+# Citation file for BsplineQuantRegGui package
+
+citHeader("To cite the BsplineQuantRegGui package in publications, please use:")
+)
+
+# 1. R package (CRAN)
+bibentry(
+  bibtype = "Manual",
+  title = "BsplineQuantRegGui: Interactive GUI for B-Spline Quantile Regression",
+  author = c(person(given = "Alexandre", family = "Abbes")),
+  year = "2026",
+  note = paste("R package version", utils::packageVersion("BsplineQuantRegGui")),
+  url = "https://cran.r-project.org/package=BsplineQuantRegGui",
+  textVersion = paste(
+    "Abbes, A. (2026).",
+    "BsplineQuantRegGui: Interactive GUI for B-Spline Quantile Regression.",
+    "(R package version", utils::packageVersion("BsplineQuantRegGui"), ").",
+    "https://cran.r-project.org/package=BsplineQuantRegGui"
+  )
+)
+
+# 2. Underlying R package (BsplineQuantReg)
+bibentry(
+  bibtype = "Manual",
+  title = "BsplineQuantReg: Constrained Quantile Regression with B-Splines (Degrees 1 to 4)",
+  author = c(person(given = "Alexandre", family = "Abbes")),
+  year = "2026",
+  note = paste("R package version", utils::packageVersion("BsplineQuantReg")),
+  url = "https://cran.r-project.org/package=BsplineQuantReg",
+  textVersion = paste(
+    "Abbes, A. (2026).",
+    "BsplineQuantReg: Constrained Quantile Regression with B-Splines.",
+    "(R package version", utils::packageVersion("BsplineQuantReg"), ").",
+    "https://cran.r-project.org/package=BsplineQuantReg"
+  )
+)
+
+
+# 3. Python package (PyPI)
+bibentry(
+  bibtype = "Manual",
+  title = "BsplineQuantRegpy: Python Implementation of B-Spline Quantile Regression",
+  author = c(person(given = "Alexandre", family = "Abbes")),
+  year = "2026",
+  note = "Python package version 1.0.1",
+  url = "https://pypi.org/project/BsplineQuantRegpy/",
+  textVersion = paste(
+    "Abbes, A. (2026).",
+    "BsplineQuantRegpy: Python Implementation of B-Spline Quantile Regression.",
+    "(Python package version 1.0.1).",
+    "https://pypi.org/project/BsplineQuantRegpy/"
+  )
+)
+
+# 4. Main method article
+bibentry(
+  bibtype = "Article",
+  title = "Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications",
+  author = c(person(given = "Alexandre", family = "Abbes")),
+  year = "2025",
+  journal = "Zenodo",
+  doi = "10.5281/zenodo.17427913",
+  url = "https://doi.org/10.5281/zenodo.17427913",
+  textVersion = paste(
+    "Abbes, A. (2025).",
+    "Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications.",
+    "Zenodo. doi:10.5281/zenodo.17427913"
+  )
+
