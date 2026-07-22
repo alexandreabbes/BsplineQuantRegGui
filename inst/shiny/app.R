@@ -207,8 +207,10 @@ ui <- fluidPage(
                           h3("4. Execution"),
                           h5("Color:"),
                           fluidRow(
-                           column(6, colourpicker::colourInput("curve_color", NULL, value = "blue"),style = "width:50%;"),
-                           column(6, actionButton("apply_color", "Apply", class = "btn-sm", style = "width:50%;"))
+                           column(6, colourpicker::colourInput("curve_color", NULL, value = "blue"),
+                                  style = "width:50%;"),
+                           column(6, actionButton("apply_color", "Apply",
+                                                  class = "btn-sm", style = "width:70%;"))
                           ),
 
                           p("Curves:", textOutput("curve_count", inline = TRUE)),
