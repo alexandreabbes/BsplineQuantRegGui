@@ -99,89 +99,18 @@ ui <- fluidPage(
       ),
 
       hr(),
-
-      # ============ 3. CONSTRAINTS ============
-      h4("3. Constraints", class = "text-primary"),
-
-      radioButtons("constraint_mode", "Mode:",
-                   choices = c("Uniform" = "uniform", "Per region" = "region"),
-                   selected = "uniform", inline = TRUE),
-
-      conditionalPanel(
-        condition = "input.constraint_mode == 'uniform'",
-        radioButtons("monot", "Monotonicity:",
-                     choices = c("x" = "0", "up" = "1", "down" = "-1"),
-                     selected = "0", inline = TRUE),
-        radioButtons("conv", "Convexity:",
-                     choices = c("x" = "0", "U" = "1", "n" = "-1"),
-                     selected = "0", inline = TRUE),
-        conditionalPanel(
-          condition = "input.degree >= 3",
-          radioButtons("der3", "3rd Derivative:",
-                       choices = c("x" = "0", "+" = "1", "-" = "-1"),
-                       selected = "0", inline = TRUE)
-        )
-      ),
-
-      conditionalPanel(
-        condition = "input.constraint_mode == 'region'",
-        div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
-            "1. Click 'Select'"),
-        div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
-            "2. Select a region on the plot"),
-        div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
-            "3. X min/max fields are updated"),
-
-        fluidRow(
-          column(6, actionButton("start_selection", "Select",
-                                 class = "btn-sm btn-warning", style = "width:100%;")),
-          column(6, actionButton("clear_regions", "Cancel region",
-                                 class = "btn-sm btn-danger", style = "width:100%;"))
-        ),
-        br(),
-
-        fluidRow(
-          column(6, numericInput("region_xmin", "X min:", value = 0.3, step = 0.05)),
-          column(6, numericInput("region_xmax", "X max:", value = 0.6, step = 0.05))
-        ),
-
-        radioButtons("region_monot", "Monotonicity:",
-                     choices = c("x" = "0", "up" = "1", "down" = "-1"),
-                     selected = "0", inline = TRUE),
-        radioButtons("region_conv", "Convexity:",
-                     choices = c("x" = "0", "U" = "1", "n" = "-1"),
-                     selected = "0", inline = TRUE),
-        conditionalPanel(
-          condition = "input.degree >= 3",
-          radioButtons("region_der3", "3rd Derivative:",
-                       choices = c("x" = "0", "+" = "1", "-" = "-1"),
-                       selected = "0", inline = TRUE)
-        ),
-
-        fluidRow(
-          column(6, actionButton("add_region", "Add region",
-                                 class = "btn-sm btn-primary", style = "width:100%;")),
-          column(6, actionButton("update_region", "Update",
-                                 class = "btn-sm btn-info", style = "width:100%;"))
-        ),
-        br(),
-        div(id = "regions_list", style = "max-height: 120px; overflow-y: auto;")
-      ),
-
-      hr(),
-
       # ============ 4. EXECUTION ============
-      actionButton("run", "Run",
-                   class = "btn-success btn-lg", style = "width:100%;"),
+      #actionButton("run", "Run",
+      #             class = "btn-success btn-lg", style = "width:100%;"),
 
-      fluidRow(
-        column(6, actionButton("clear_all", "Clear all",
-                               class = "btn-sm btn-danger", style = "width:100%;")),
-        column(6, actionButton("clear_curves", "Clear curves",
-                               class = "btn-sm btn-warning", style = "width:100%;"))
-      ),
+      #fluidRow(
+      #  column(6, actionButton("clear_all", "Clear all",
+      #                         class = "btn-sm btn-danger", style = "width:100%;")),
+      #  column(6, actionButton("clear_curves", "Clear curves",
+      #                         class = "btn-sm btn-warning", style = "width:100%;"))
+      #),
 
-      hr(),
+      #hr(),
       # Dans le sidebarPanel, sous la section "5. Demos" :
 
       h4("5. Demos", class = "text-primary"),
@@ -211,16 +140,93 @@ ui <- fluidPage(
         tabPanel("Visualization",
                  br(),
                  fluidRow(
-                   column(10, plotlyOutput("spline_plot", height = "500px")),
-                   column(2,
+                   column(9, plotlyOutput("spline_plot", height = "500px")),
+
+                   column(3,
+                          h3("3. Constraints", class = "text-primary"),
+                          radioButtons("constraint_mode", "Mode:",
+                                       choices = c("Uniform" = "uniform", "Per region" = "region"),
+                                       selected = "uniform", inline = TRUE),
+
+                          conditionalPanel(
+                            condition = "input.constraint_mode == 'uniform'",
+                            radioButtons("monot", "Monotonicity:",
+                                         choices = c("x" = "0", "up" = "1", "down" = "-1"),
+                                         selected = "0", inline = TRUE),
+                            radioButtons("conv", "Convexity:",
+                                         choices = c("x" = "0", "U" = "1", "n" = "-1"),
+                                         selected = "0", inline = TRUE),
+                            conditionalPanel(
+                              condition = "input.degree >= 3",
+                              radioButtons("der3", "3rd Derivative:",
+                                           choices = c("x" = "0", "+" = "1", "-" = "-1"),
+                                           selected = "0", inline = TRUE)
+                            )
+                          ),
+
+                          conditionalPanel(
+                            condition = "input.constraint_mode == 'region'",
+                            div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
+                                "1. Click 'Select'"),
+                            div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
+                                "2. Select a region on the plot"),
+                            div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
+                                "3. X min/max fields are updated"),
+
+                            fluidRow(
+                              column(6, actionButton("start_selection", "Select",
+                                                     class = "btn-sm btn-warning", style = "width:100%;")),
+                              column(6, actionButton("clear_regions", "Cancel region",
+                                                     class = "btn-sm btn-danger", style = "width:100%;"))
+                            ),
+                            br(),
+
+                            fluidRow(
+                              column(6, numericInput("region_xmin", "X min:", value = 0.3, step = 0.05)),
+                              column(6, numericInput("region_xmax", "X max:", value = 0.6, step = 0.05))
+                            ),
+
+                            radioButtons("region_monot", "Monotonicity:",
+                                         choices = c("x" = "0", "up" = "1", "down" = "-1"),
+                                         selected = "0", inline = TRUE),
+                            radioButtons("region_conv", "Convexity:",
+                                         choices = c("x" = "0", "U" = "1", "n" = "-1"),
+                                         selected = "0", inline = TRUE),
+                            conditionalPanel(
+                              condition = "input.degree >= 3",
+                              radioButtons("region_der3", "3rd Derivative:",
+                                           choices = c("x" = "0", "+" = "1", "-" = "-1"),
+                                           selected = "0", inline = TRUE)
+                            ),
+
+                            fluidRow(
+                              column(6, actionButton("add_region", "Add region",
+                                                     class = "btn-sm btn-primary", style = "width:100%;")),
+                              column(6, actionButton("update_region", "Update",
+                                                     class = "btn-sm btn-info", style = "width:100%;"))
+                            ),
+                            br(),
+                            div(id = "regions_list", style = "max-height: 120px; overflow-y: auto;")
+                          ),
                           h5("Color:"),
                           colourpicker::colourInput("curve_color", NULL, value = "blue"),
                           actionButton("apply_color", "Apply", class = "btn-sm", style = "width:100%;"),
                           br(), br(),
-                          p("Curves:", textOutput("curve_count", inline = TRUE))
+                          p("Curves:", textOutput("curve_count", inline = TRUE)),
+
+                          # ============ 4. EXECUTION ============
+                          h4("4. Execution"),
+                          actionButton("run", "Run",
+                                       class = "btn-success btn-lg", style = "width:100%;"),
+
+                          fluidRow(
+                            actionButton("clear_all", "Clear all", class = "btn-sm btn-danger", style = "width:100%;"),
+                            actionButton("clear_curves", "Clear curves",class = "btn-sm btn-warning", style = "width:100%;")
+                          ),
                    )
                  ),
                  br(),
+
 
                  # Information (unique)
                  fluidRow(
