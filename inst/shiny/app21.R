@@ -95,7 +95,9 @@ ui <- fluidPage(
       fluidRow(
         column(6, sliderInput("tau", "Tau:", min = 0.05, max = 0.95, value = 0.5)),
         column(6, selectInput("solver", "Solver:",
-                              choices = c("CLARABEL", "OSQP", "ECOS", "SCS")))
+                              choices = c("CLARABEL", "OSQP", "ECOS", "SCS"))),
+        column(6, selectInput("verbose", "Verbose ",
+                              choices = c("TRUE", "FALSE")))
       ),
 
       hr(),
@@ -622,7 +624,22 @@ server <- function(input, output, session) {
         }
       }
     }
+    # Dans build_constraints(), pour les contraintes uniformes
+    if (input$constraint_mode == "uniform") {
+      # S'assurer que les valeurs sont numériques
+      monot_val <- as.numeric(input$monot)
+      conv_val <- as.numeric(input$conv)
+      der3_val <- as.numeric(input$der3)
 
+      # Remplacer NA par 0
+      if (is.na(monot_val)) monot_val <- 0
+      if (is.na(conv_val)) conv_val <- 0
+      if (is.na(der3_val)) der3_val <- 0
+
+      monot <- rep(monot_val, kn)
+      conv <- rep(conv_val, kn + 1)
+      der3 <- rep(der3_val, kn)
+    }
     if (degree < 3) der3 <- rep(0, kn)
 
     list(monot = monot, conv = conv, der3 = der3)
@@ -752,24 +769,32 @@ server <- function(input, output, session) {
     withProgress(message = "Regression...", {
       constraints <- build_constraints()
       if (is.null(constraints)) return()
-
-      fit <- tryCatch({
-        quantile_spline(
+      cat (as.vector(values$knots),
+           input$tau,
+           input$degree,
+            constraints$monot,
+            constraints$conv,
+            constraints$der3,
+            input$solver,
+            TRUE,
+            FALSE,'\n')
+      fit <-quantile_spline(
           as.vector(values$xtab),
           as.vector(values$ytab),
           as.vector(values$knots),
-          tau = input$tau,
+          input$tau,
           degree = input$degree,
           monot = constraints$monot,
           convcons = constraints$conv,
           der3cons = constraints$der3,
           solver = input$solver,
-          callable = TRUE
-        )
-      }, error = function(e) {
-        showNotification(paste("Error:", e$message), type = "error")
-        NULL
-      })
+          callable = TRUE,
+          verbose= FALSE)
+        cat('fit OK')
+      #}, error = function(e) {
+      #  showNotification(paste("Error:", e$message), type = "error")
+      #  NULL
+      #})
 
       if (!is.null(fit)) {
         x_eval <- seq(min(values$xtab), max(values$xtab), length.out = 300)
@@ -902,12 +927,24 @@ server <- function(input, output, session) {
   # ============ OUTPUTS ============
 
   output$fit_info <- renderPrint({
-    if (is.null(values$fit)) { cat("No regression") } else {
+    if (is.null(values$fit)) {
+      cat("No regression")
+    } else {
       cat("Status: Success\n")
-      cat("Degree:", attr(values$fit, "degree"), "\n")
-      cat("Tau:", input$tau, "\n")
-      cat("Knots:", length(values$knots), "\n")
-      cat("Coefficients:", length(attr(values$fit, "coefficients")), "\n")
+
+      # Vérifier le type de l'objet
+      if (is.list(values$fit)) {
+        cat("Degree:", values$fit$degree %||% attr(values$fit, "degree"), "\n")
+        cat("Tau:", input$tau, "\n")
+        cat("Knots:", length(values$knots), "\n")
+        cat("Coefficients:", length(values$fit$coefficients %||% attr(values$fit, "coefficients")), "\n")
+      } else {
+        # Pour les objets BSpline ou autres
+        cat("Degree:", attr(values$fit, "degree") %||% "unknown", "\n")
+        cat("Tau:", input$tau, "\n")
+        cat("Knots:", length(values$knots), "\n")
+        cat("Coefficients:", length(attr(values$fit, "coefficients") %||% values$fit$c), "\n")
+      }
     }
   })
 
