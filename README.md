@@ -83,10 +83,10 @@ r
 
 citation("BsplineQuantRegGui")
 
-License
+#License
 
 GPL-3 © Alexandre Abbes
 
-Based on the method described in:
-
-    Karlin, S., & Studden, W. J. (1966). Tchebycheff systems: With applications in analysis and statistics. Interscience Publishers.
+#Based on the method described in:
+   URL: https://github.com/alexandreabbes/BsplineQuantReg,
+    https://doi.org/10.5281/zenodo.17427913
