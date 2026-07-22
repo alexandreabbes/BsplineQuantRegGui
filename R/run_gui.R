@@ -3,7 +3,7 @@
 # Stable version with graphical region selection
 #
 # Run with:
-# shiny::runApp("inst/app.R")
+# shiny::runApp("R/run_gui.R")
 
 library(shiny)
 library(shinythemes)
