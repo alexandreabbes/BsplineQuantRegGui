@@ -3,26 +3,19 @@ Type: Package
 Title: Interactive Shiny Interface for BsplineQuantReg
 Version: 0.1.0
 Date: 2026-07-22
-Authors@R: c(
-    person("Alexandre", "Abbes", 
-           email = "alexandre.abbes@proton.me",
-           role = c("aut", "cre")
-           )
-  )
+Authors@R: person("Alexandre", "Abbes", email = "alexandre.abbes@proton.me", role = c("aut", "cre"))
 Description: A user-friendly interactive Shiny interface for the BsplineQuantReg package, 
     enabling quantile regression using B-splines with shape constraints. 
     Features include interactive knot placement, per-region constraint specification, 
     CSV/Excel data import, demo presets, and reproducible R code generation.
     Based on the method described in Alexandre Abbes (2025).
 License: GPL-3
-URL: https://github.com/alexandreabbes/BsplineQuantRegGui
-URL: https://cran.r-project.org/web/packages/BsplineQuantReg/index.html
-URL: https://github.com/alexandreabbes/BsplineQuantReg,
-URL: https://doi.org/10.5281/zenodo.17427913
-
+URL: https://github.com/alexandreabbes/BsplineQuantRegGui,
+ https://cran.r-project.org/web/packages/BsplineQuantReg/index.html,
+ https://github.com/alexandreabbes/BsplineQuantReg,
+ https://doi.org/10.5281/zenodo.17427913
 BugReports: https://github.com/alexandreabbes/BsplineQuantRegGui/issues
 Encoding: UTF-8
-RoxygenNote: 7.3.2
 Imports:
     shiny,
     shinythemes,
@@ -45,3 +38,4 @@ VignetteBuilder: knitr
 Config/testthat/edition: 3
 SystemRequirements: None
 NeedsCompilation: no
+Config/roxygen2/version: 8.0.0
