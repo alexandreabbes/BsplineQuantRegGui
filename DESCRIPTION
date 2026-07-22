@@ -9,7 +9,7 @@ Description: A user-friendly interactive Shiny interface for the BsplineQuantReg
     Features include interactive knot placement, per-region constraint specification, 
     CSV/Excel data import, demo presets, and reproducible R code generation.
     Based on the method described in Alexandre Abbes (2025).
-License: GPL-3
+License: GPL-3 + file LICENSE
 URL: https://github.com/alexandreabbes/BsplineQuantRegGui,
  https://cran.r-project.org/web/packages/BsplineQuantReg/index.html,
  https://github.com/alexandreabbes/BsplineQuantReg,

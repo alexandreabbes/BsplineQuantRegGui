@@ -2,7 +2,6 @@
 # Citation file for BsplineQuantRegGui package
 
 citHeader("To cite the BsplineQuantRegGui package in publications, please use:")
-)
 
 # 1. R package (CRAN)
 bibentry(
@@ -66,5 +65,6 @@ bibentry(
     "Abbes, A. (2025).",
     "Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications.",
     "Zenodo. doi:10.5281/zenodo.17427913"
+  )
   )
 

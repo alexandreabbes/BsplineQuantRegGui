@@ -9,7 +9,8 @@
 #' @importFrom shinyjs useShinyjs
 #' @importFrom plotly plotlyOutput renderPlotly plot_ly
 #' @importFrom DT DTOutput renderDT datatable
-#'
+#' @mportsFrom colourpicker  grDevices graphics grid  png readxl
+#' @mportsFrom shinythemes utils
 #' @examples
 #' if (interactive()) {
 #'   runGui()
