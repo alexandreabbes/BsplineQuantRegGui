@@ -22,15 +22,13 @@ Imports:
     shinyjs,
     BsplineQuantReg (>= 0.2.0),
     DT,
-    plotly,
-    colourpicker,
+    plotly
+
+Suggests:   
     grDevices,
     graphics,
-    utils,
+    colourpicker,
     grid,
-    png,
-    readxl
-Suggests:
     knitr,
     rmarkdown,
     testthat (>= 3.0.0)
