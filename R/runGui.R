@@ -9,8 +9,8 @@
 #' @importFrom shinyjs useShinyjs
 #' @importFrom plotly plotlyOutput renderPlotly plot_ly
 #' @importFrom DT DTOutput renderDT datatable
-#' @importFrom colourpicker
-#' @importFrom shinythemes
+#' @import shinythemes
+#' @importFrom colourpicker colourInput
 #' @examples
 #' if (interactive()) {
 #'   runGui()

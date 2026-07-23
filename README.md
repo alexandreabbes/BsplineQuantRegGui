@@ -26,9 +26,10 @@ This GUI application makes it easy to:
 ## Features
 
 - **Interactive Plotting**: Zoom, pan, and add knots by clicking on the plot
+- **Multiple Data Sources**: Custom function, CSV files, Test data of temperature dataset
 - **Constraint Management**: Add per-region constraints (monotonicity, convexity, 3rd derivative)
-- **Multiple Data Sources**: Test data, temperature dataset, custom function, CSV files, and Excel files
-- **Demo Presets**: Run package demos directly from the interface
+- **Degree management**: Set the degree of the splines used for regression : 1 to 4
+- **Demo Presets**: Run package demos directly from the interface (according degree)
 - **R Code Generation**: Export reproducible R code for your analysis
 - **Customizable Visualization**: Multiple curve plotting with color management
 - **Real-time Feedback**: Progress bars and notifications during computation

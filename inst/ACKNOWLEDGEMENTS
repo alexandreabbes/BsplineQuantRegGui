@@ -1,0 +1,10 @@
+Acknowledgements
+
+The development of BsplineQuantReg and BsplineQuantRegGui was supported by
+DeepSeek AI (https://deepseek.com), which provided AI-assisted coding,
+debugging, and documentation support throughout the development process.
+
+Special thanks to the DeepSeek team for their advanced language model
+capabilities that helped refine the implementation of Karlin-Studden
+constraints, the Shiny interface, and the cross-language compatibility
+between R and Python versions.

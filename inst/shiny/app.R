@@ -35,11 +35,27 @@ ui <- fluidPage(
   ")),
 
   titlePanel(
-    h1("BsplineQuantReg - Quantile Regression with B-Splines under Shape Constraints",
+    h2("BsplineQuantReg - Quantile Regression with B-Splines under Shape Constraints",
        align = "center", style = "color: #2c3e50;"),
     windowTitle = "BsplineQuantReg"
   ),
+  #themeSelector(),
+  div(
+    style = "position: absolute; top: 10px; right: 20px; z-index: 1000;",
+    actionButton("toggle_theme", "Themes",
+                 class = "btn-sm btn-outline-secondary",
+                 style = "border-radius: 20px; padding: 5px 15px;")
+  ),
 
+  # Et la zone pour le themeSelector (cachée par défaut)
+  div(
+    id = "theme_selector_area",
+    style = "display: none; position: absolute; top: 50px; right: 20px; z-index: 1000;
+           background: white; padding: 15px; border-radius: 8px;
+           box-shadow: 0 4px 12px rgba(0,0,0,0.15); width: 250px;",
+    h5("Select Theme:"),
+    themeSelector()
+  ),
   sidebarLayout(
     sidebarPanel(
       width = 3,
@@ -309,6 +325,12 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
 
+  #Theme selector
+  # Dans le server, ajoutez :
+  observeEvent(input$toggle_theme, {
+    # Basculer l'affichage de la zone de thème
+    toggle("theme_selector_area", anim = TRUE)
+  })
   # ============ REACTIVE VALUES ============
   values <- reactiveValues(
     xtab = NULL,
