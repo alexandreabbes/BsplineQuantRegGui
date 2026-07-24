@@ -311,8 +311,7 @@ ui <- fluidPage(
                           p("4. 'Add region'")
                    )
                  )
-        )
-
+                )
       )
     )
   )
