@@ -6,8 +6,8 @@ Date: 2026-07-22
 Authors@R: person("Alexandre", "Abbes", email = "alexandre.abbes@proton.me", role = c("aut", "cre"))
 Description: A user-friendly interactive Shiny interface for the 'BsplineQuantReg' package, enabling quantile regression using B-splines with shape constraints,
     based on the method described in Abbes (2025). Almost all parameters of the main function 'quantile_spline()' can be tuned. Features include interactive
-    knot placement, per-region constraint specification, CSV data import, direct demo access, reproducible R code generation, and solver selection.
-    This GUI is similar to the Python Tk version 'BsplineQuantRegPy'.
+    knot placement, per-region constraint specification, 'CSV' data import, direct demo access, reproducible R code generation, and solver selection.
+    This GUI is similar to the 'Python Tk' version 'BsplineQuantRegPy'.
 License: GPL-3
 URL: https://github.com/alexandreabbes/BsplineQuantRegGui,
     https://cran.r-project.org/web/packages/BsplineQuantReg/index.html,
@@ -20,7 +20,7 @@ Imports:
     BsplineQuantReg (>= 0.2.0),
     DT,
     plotly,
-    colourpicker,
+    colourpicker
 Suggests:   
     cobs
 LazyData: true

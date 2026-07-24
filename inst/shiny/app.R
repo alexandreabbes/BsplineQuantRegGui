@@ -112,7 +112,7 @@ ui <- fluidPage(
       fluidRow(
         column(6, sliderInput("tau", "Tau:", min = 0.05, max = 0.95, value = 0.5)),
         column(6, selectInput("solver", "Solver:",
-                              choices = c("CLARABEL", "OSQP", "ECOS", "SCS"))),
+                              choices = c("CLARABEL","HIGHS","OSQP", "ECOS", "SCS","GUROBI"))),
         column(6, selectInput("verbose", "Verbose ",
                               choices = c("TRUE", "FALSE")))
       ),
