@@ -114,7 +114,7 @@ ui <- fluidPage(
         column(6, selectInput("solver", "Solver:",
                               choices = c("CLARABEL","HIGHS","OSQP", "ECOS", "SCS","GUROBI"))),
         column(6, selectInput("verbose", "Verbose ",
-                              choices = c("TRUE", "FALSE")))
+                              choices = c( "FALSE","TRUE") ) )
       ),
 
       hr(),
@@ -959,24 +959,13 @@ server <- function(input, output, session) {
         status = NA
       )
 
-      if (inherits(values$fit, "callable_spline")) {
-        params <- get_parameters(values$fit)
+      if (inherits(fit, "callable_spline")) {
+        params <- get_parameters(fit)
         info$degree <- params$degree
         info$knots <- params$knot
         info$coeff <- params$coeff
         info$status <- if (!is.null(params$result)) params$result$status else NA
-      } else if (is.list(values$fit)) {
-        info$degree <- values$fit$degree %||% attr(values$fit, "degree")
-        info$knots <- values$fit$knot %||% values$fit$knots
-        info$coeff <- values$fit$coeff %||% values$fit$coefficients %||% attr(values$fit, "coefficients")
-        info$status <- if (!is.null(values$fit$result)) values$fit$result$status else NA
-      } else {
-        info$degree <- attr(values$fit, "degree")
-        info$knots <- values$knots
-        info$coeff <- attr(values$fit, "coefficients") %||% values$fit$c
-        info$status <- NA
       }
-
       cat("Status: Success\n")
       cat("Degree:", if (!is.na(info$degree)) info$degree else "unknown", "\n")
       cat("Tau:", input$tau, "\n")
@@ -985,13 +974,8 @@ server <- function(input, output, session) {
       if (!is.na(info$status)) {
         cat("Solver status:", info$status, "\n")
       }
-
-      if (!is.null(info$coeff) && length(info$coeff) > 0) {
-        cat("\nCoefficient range: [", round(min(info$coeff, na.rm = TRUE), 4),
-            ", ", round(max(info$coeff, na.rm = TRUE), 4), "]\n")
       }
-
-    }, error = function(e) {
+      , error = function(e) {
       cat("Error displaying fit info:", e$message)
     })
 
