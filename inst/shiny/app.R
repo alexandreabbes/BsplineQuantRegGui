@@ -247,10 +247,6 @@ ui <- fluidPage(
                  # Information (unique)
                  fluidRow(
                    column(6, h5("Information"), verbatimTextOutput("fit_info")),
-                   column(6, h5("Coefficients"), verbatimTextOutput("coef_info"))
-                 ),
-                 br(),
-                 fluidRow(
                    column(6, h5("List of knots"), verbatimTextOutput("knots_compact", placeholder = TRUE))
                  ),
 
@@ -316,6 +312,7 @@ ui <- fluidPage(
                    )
                  )
         )
+
       )
     )
   )
@@ -811,7 +808,7 @@ server <- function(input, output, session) {
           der3cons = constraints$der3,
           solver = input$solver,
           callable = TRUE,
-          verbose=FALSE
+          verbose= input$verbose
         )
       }, error = function(e) {
         showNotification(paste("Error:", e$message), type = "error")
@@ -949,35 +946,59 @@ server <- function(input, output, session) {
   # ============ OUTPUTS ============
 
   output$fit_info <- renderPrint({
-    if (is.null(values$fit)) {
-      cat("No regression")
-    } else {
-      cat("Status: Success\n")
-
-      # Vérifier le type de l'objet
-      if (is.list(values$fit)) {
-        cat("Degree:", values$fit$degree %||% attr(values$fit, "degree"), "\n")
-        cat("Tau:", input$tau, "\n")
-        cat("Knots:", length(values$knots), "\n")
-        cat("Coefficients:", length(values$fit$coefficients %||% attr(values$fit, "coefficients")), "\n")
-      } else {
-        # Pour les objets BSpline ou autres
-        cat("Degree:", attr(values$fit, "degree") %||% "unknown", "\n")
-        cat("Tau:", input$tau, "\n")
-        cat("Knots:", length(values$knots), "\n")
-        cat("Coefficients:", length(attr(values$fit, "coefficients") %||% values$fit$c), "\n")
+    tryCatch({
+      if (is.null(values$fit)) {
+        cat("No regression")
+        return()
       }
-    }
+
+      # Extraire les informations
+      info <- list(
+        degree = NA,
+        knots = NA,
+        coeff = NA,
+        status = NA
+      )
+
+      if (inherits(values$fit, "callable_spline")) {
+        params <- get_parameters(values$fit)
+        info$degree <- params$degree
+        info$knots <- params$knot
+        info$coeff <- params$coeff
+        info$status <- if (!is.null(params$result)) params$result$status else NA
+      } else if (is.list(values$fit)) {
+        info$degree <- values$fit$degree %||% attr(values$fit, "degree")
+        info$knots <- values$fit$knot %||% values$fit$knots
+        info$coeff <- values$fit$coeff %||% values$fit$coefficients %||% attr(values$fit, "coefficients")
+        info$status <- if (!is.null(values$fit$result)) values$fit$result$status else NA
+      } else {
+        info$degree <- attr(values$fit, "degree")
+        info$knots <- values$knots
+        info$coeff <- attr(values$fit, "coefficients") %||% values$fit$c
+        info$status <- NA
+      }
+
+      cat("Status: Success\n")
+      cat("Degree:", if (!is.na(info$degree)) info$degree else "unknown", "\n")
+      cat("Tau:", input$tau, "\n")
+      cat("Knots:", length(info$knots %||% values$knots), "\n")
+      cat("Coefficients:", length(info$coeff %||% numeric(0)), "\n")
+      if (!is.na(info$status)) {
+        cat("Solver status:", info$status, "\n")
+      }
+
+      if (!is.null(info$coeff) && length(info$coeff) > 0) {
+        cat("\nCoefficient range: [", round(min(info$coeff, na.rm = TRUE), 4),
+            ", ", round(max(info$coeff, na.rm = TRUE), 4), "]\n")
+      }
+
+    }, error = function(e) {
+      cat("Error displaying fit info:", e$message)
+    })
+
   })
 
-  output$coef_info <- renderPrint({
-    if (is.null(values$fit)) { cat("No coefficients") } else {
-      coefs <- attr(values$fit, "coefficients")
-      cat("Min:", round(min(coefs), 4), "\n")
-      cat("Max:", round(max(coefs), 4), "\n")
-      cat("Mean:", round(mean(coefs), 4), "\n")
-    }
-  })
+
 
   output$curve_count <- renderText({ length(values$curve_lines) })
 
