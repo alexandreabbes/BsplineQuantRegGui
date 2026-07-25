@@ -64,13 +64,13 @@ ui <- fluidPage(
       # ============ 1. DATA ============
       h3("1. Data", class = "text-primary"),
 
-      fluidRow(
-        column(4, actionButton("test_data", "Test",
-                               class = "btn-sm btn-success", style = "width:100%; background-color:#000000")),
-        column(4, actionButton("temp_data", "Temp",
-                               class = "btn-sm btn-warning", style = "width:100%;background-color:#FF0000")),
-        column(4, actionButton("load_csv", "CSV",
-                               class = "btn-sm btn-info", style = "width:100%;background-color:#10AA10"))
+      div(style = "display: flex; flex-wrap: wrap; gap: 5px;",
+        actionButton("test_data", "Test",
+                               class = "btn-sm btn-success", style = " background-color:#000000;"),
+        actionButton("temp_data", "Temp",
+                               class = "btn-sm btn-warning", style = "background-color:#FF0000;"),
+        actionButton("load_csv", "CSV",
+                               class = "btn-sm btn-info", style = "background-color:#10AA10;")
       ),
       br(),
 
@@ -89,28 +89,29 @@ ui <- fluidPage(
       ),
 
       actionButton("generate_custom", "Generate",
-                   class = "btn-sm btn-primary", style = "width:100%;"),
+                   class = "btn-sm btn-primary"),
 
       hr(),
 
       # ============ 2. SPLINE ============
       h3("2. Spline", class = "text-primary"),
 
-      fluidRow(
-        column(6, numericInput("degree", "Degree:", value = 3, min = 1, max = 4)),
-        column(6, numericInput("knots_count", "Auto knots:", value = 10, min = 2, max = 30))
+      fluidRow( column(6,numericInput("degree", "Degree:", value = 3, min = 1, max = 4)),
+              column(6,numericInput("knots_count", "Auto knots:", value = 10, min = 2, max = 30))
       ),
 
       fluidRow(
-        column(6, actionButton("add_knot_mode", "Add knot",
-                               class = "btn-sm btn-primary", style = "width:100%;background-color:#FFDD00; color:#000000")),
-        column(6, actionButton("clear_knots", "Clear knots",
-                               class = "btn-sm btn-danger", style = "width:100%;"))
+        column(4, actionButton("add_knot_mode", "Add knot",
+                               class = "btn-sm btn-primary", style = "background-color:#FFDD00; color:#000000")),
+        column(4, actionButton("clear_knots", "Clear knots",
+                               class = "btn-sm btn-danger"))
       ),
       br(),
 
       fluidRow(
-        column(6, sliderInput("tau", "Tau:", min = 0.05, max = 0.95, value = 0.5)),
+         sliderInput("tau", "Tau:", min = 0.05, max = 0.95, value = 0.5)),
+      br(),
+      fluidRow(
         column(6, selectInput("solver", "Solver:",
                               choices = c("CLARABEL","HIGHS","OSQP", "ECOS", "SCS","GUROBI"))),
         column(6, selectInput("verbose", "Verbose ",
@@ -124,6 +125,7 @@ ui <- fluidPage(
       h3("5. Demos", class = "text-primary"),
       div(style = "display: flex; flex-wrap: wrap; gap: 5px;",
           actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info", style = "flex:1;"),
+          actionButton("demo_monot", "Monotonicity", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_log", "Logistic", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_temp", "Temperature", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info", style = "flex:1;"),
@@ -223,21 +225,19 @@ ui <- fluidPage(
                           h3("4. Execution"),
                           h5("Color:"),
                           fluidRow(
-                           column(6, colourpicker::colourInput("curve_color", NULL, value = "blue"),
-                                  style = "width:50%;"),
-                           column(6, actionButton("apply_color", "Apply",
-                                                  class = "btn-sm", style = "width:70%;"))
+                           column(6, colourpicker::colourInput("curve_color", NULL, value = "blue")),
+                           column(6, actionButton("apply_color", "Apply", class = "btn-sm") )
                           ),
 
                           p("Curves:", textOutput("curve_count", inline = TRUE)),
 
 
                           actionButton("run", "Run",
-                                       class = "btn-success btn-lg", style = "width:100%;"),
+                                       class = "btn-success btn-lg"),
 
                           fluidRow(
-                            actionButton("clear_all", "Clear all", class = "btn-sm btn-danger", style = "width:100%;"),
-                            actionButton("clear_curves", "Clear curves",class = "btn-sm btn-warning", style = "width:100%;")
+                            actionButton("clear_all", "Clear all", class = "btn-sm btn-danger"),
+                            actionButton("clear_curves", "Clear curves",class = "btn-sm btn-warning")
                           ),
                    )
                  ),
@@ -257,6 +257,7 @@ ui <- fluidPage(
                    column(12,
                           h5("Run Demos:"),
                           actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info"),
+                          actionButton("demo_monot", "Monotonicity", class = "btn-sm btn-info"),
                           actionButton("demo_log", "Logistic", class = "btn-sm btn-info"),
                           actionButton("demo_temp", "Temperature", class = "btn-sm btn-info"),
                           actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info"),
@@ -311,7 +312,27 @@ ui <- fluidPage(
                           p("4. 'Add region'")
                    )
                  )
-                )
+                ),
+        tabPanel("Console",
+                 br(),
+                 fluidRow(
+                   column(12,
+                          div(style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;",
+                              h4("Console Output", style = "margin: 0;"),
+                              actionButton("clear_console", "Clear Console",
+                                           icon = icon("eraser"),
+                                           class = "btn-sm btn-danger")
+                          ),
+                          div(
+                            style = "background-color: #1e1e1e; color: #d4d4d4; padding: 15px;
+                 border-radius: 5px; font-family: 'Courier New', monospace;
+                 font-size: 13px; height: 400px; overflow-y: auto;
+                 white-space: pre-wrap; word-wrap: break-word;",
+                            verbatimTextOutput("console_output")
+                          )
+                   )
+                 )
+        )
       )
     )
   )
@@ -327,6 +348,7 @@ server <- function(input, output, session) {
     # Basculer l'affichage de la zone de thème
     toggle("theme_selector_area", anim = TRUE)
   })
+
   # ============ REACTIVE VALUES ============
   values <- reactiveValues(
     xtab = NULL,
@@ -363,6 +385,29 @@ server <- function(input, output, session) {
     updateNumericInput(session, "region_xmin", value = round(xmin, 3))
     updateNumericInput(session, "region_xmax", value = round(xmax, 3))
   }
+
+  # ============ CONSOLE ============
+
+  console_messages <- reactiveVal("")
+
+
+
+
+  log_console <- function(msg) {
+    current <- console_messages()
+    console_messages(paste0(current, msg, "\n"))
+    cat(msg, "\n")  # Pour voir dans la console R aussi
+  }
+
+  # Observer pour vider la console
+  observeEvent(input$clear_console, {
+    console_messages("")
+  })
+
+  # Afficher la console
+  output$console_output <- renderText({
+    console_messages()
+  })
 
   # ============ DATA GENERATION ============
 
@@ -791,28 +836,56 @@ server <- function(input, output, session) {
       return()
     }
 
-    withProgress(message = "Regression...", {
+    withProgress(message = "Regression...",
+                 {
       constraints <- build_constraints()
       if (is.null(constraints)) return()
 
-      fit <- tryCatch({
-        quantile_spline(
-          as.vector(values$xtab),
-          as.vector(values$ytab),
-          as.vector(values$knots),
-          tau = input$tau,
-          degree = input$degree,
-          monot = constraints$monot,
-          convcons = constraints$conv,
-          der3cons = constraints$der3,
-          solver = input$solver,
-          callable = TRUE,
-          verbose= input$verbose
-        )
-      }, error = function(e) {
-        showNotification(paste("Error:", e$message), type = "error")
-        NULL
-      })
+      log_console("=== Starting Regression ===")
+      log_console(paste("Degree:", input$degree))
+      log_console(paste("Solver:", input$solver))
+
+      console_text <- capture.output(type=c("message"),
+                                     append=FALSE,
+        fit <- tryCatch({
+          quantile_spline(
+            as.vector(values$xtab),
+            as.vector(values$ytab),
+            as.vector(values$knots),
+            tau = input$tau,
+            degree = input$degree,
+            monot = constraints$monot,
+            convcons = constraints$conv,
+            der3cons = constraints$der3,
+            solver = input$solver,
+            callable = TRUE,
+            verbose = as.logical(input$verbose)
+          )
+        }, error = function(e) {
+          cat("Error:", e$message, "\n")
+          NULL
+        })
+      )
+
+      #log_console(console_text)
+
+      clean_ansi <- function(text) {
+        text <- gsub("gG3;", "", text)
+        text <- gsub("G3;", "", text)
+        text <- gsub("g", "", text)
+        text <- trimws(text)
+        return(text)}
+
+      #log_console(clean_ansi(console_text))
+
+      for (line in console_text) {
+        if (nchar(line) > 0) {
+          line=clean_ansi(line)
+          log_console( paste(line))
+        }
+      }
+
+
 
       if (!is.null(fit)) {
         x_eval <- seq(min(values$xtab), max(values$xtab), length.out = 300)
@@ -823,9 +896,14 @@ server <- function(input, output, session) {
         color <- input$curve_color
         values$curve_lines <- c(values$curve_lines, list(list(x = x_eval, y = y_eval, color = color)))
         showNotification("Regression successful!", type = "message")
+        #lapply(console_text, function(line) if(nchar(line)>0) log_console(line))
+
+
       }
     })
-  })
+  }
+
+  )
 
   # ============ VISUALIZATION ============
 
@@ -941,16 +1019,16 @@ server <- function(input, output, session) {
 
 
   )
+    # ============ OUTPUTS ============
 
-  # ============ OUTPUTS ============
-
+  # = INFO =
   output$fit_info <- renderPrint({
     tryCatch({
       if (is.null(values$fit)) {
         cat("No regression")
         return()
-      }
-
+      } else
+      {
       # Extraire les informations
       info <- list(
         degree = NA,
@@ -959,8 +1037,8 @@ server <- function(input, output, session) {
         status = NA
       )
 
-      if (inherits(fit, "callable_spline")) {
-        params <- get_parameters(fit)
+      if (inherits(input$fit, "callable_spline")) {
+        params <- get_parameters(input$fit)
         info$degree <- params$degree
         info$knots <- params$knot
         info$coeff <- params$coeff
@@ -974,6 +1052,7 @@ server <- function(input, output, session) {
       if (!is.na(info$status)) {
         cat("Solver status:", info$status, "\n")
       }
+    }
       }
       , error = function(e) {
       cat("Error displaying fit info:", e$message)
@@ -982,9 +1061,10 @@ server <- function(input, output, session) {
   })
 
 
-
+  # = Curve cournt =
   output$curve_count <- renderText({ length(values$curve_lines) })
 
+    # regions
   output$regions_list_ui <- renderUI({
     if (length(values$regions) == 0) {
       return(p("No regions", style = "color: #999;"))
@@ -1100,6 +1180,7 @@ server <- function(input, output, session) {
     values$data_name <- "No data"
     showNotification("All cleared", type = "message")
   })
+
   # ============ DEMOS DU PACKAGE ============
 
   demo_results <- reactiveValues(
@@ -1155,6 +1236,7 @@ server <- function(input, output, session) {
 
   # Exécuter les démos
   observeEvent(input$demo_comp, { execute_demo("comprehensive") })
+  observeEvent(input$demo_monot, { execute_demo("monotonicity") })
   observeEvent(input$demo_log, { execute_demo("logistic") })
   observeEvent(input$demo_temp, { execute_demo("temperature") })
   observeEvent(input$demo_temp2, { execute_demo("temperature2") })
@@ -1174,6 +1256,7 @@ server <- function(input, output, session) {
       cat(paste(demo_results$output, collapse = "\n"))
     }
   })
+
 }
 
 # Run app
