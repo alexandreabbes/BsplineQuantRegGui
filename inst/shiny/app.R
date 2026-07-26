@@ -870,9 +870,9 @@ server <- function(input, output, session) {
       #log_console(console_text)
 
       clean_ansi <- function(text) {
-        text <- gsub("gG3;", "", text)
-        text <- gsub("G3;", "", text)
-        text <- gsub("g", "", text)
+        text <- gsub("gG3;", "", text)
+        text <- gsub("G3;", "", text)
+        text <- gsub("g", "", text)
         text <- trimws(text)
         return(text)}
 
