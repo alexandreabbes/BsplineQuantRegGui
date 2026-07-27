@@ -125,13 +125,14 @@ ui <- fluidPage(
       h3("5. Demos", class = "text-primary"),
       div(style = "display: flex; flex-wrap: wrap; gap: 5px;",
           actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_monot", "Monotonicity", class = "btn-sm btn-info", style = "flex:1;"),
+          actionButton("demo_monot", "Monotonicity Basic", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_log", "Logistic", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_temp", "Temperature", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_conv", "Convexity", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_der3", "3rd derivative", class = "btn-sm btn-info", style = "flex:1;")
+          actionButton("demo_der3", "3rd derivative", class = "btn-sm btn-info", style = "flex:1;"),
+          actionButton("demo_derivatiev2", "derivatiev2", class = "btn-sm btn-info", style = "flex:1;")
       ),
 
 
@@ -160,7 +161,7 @@ ui <- fluidPage(
 
                           conditionalPanel(
                             condition = "input.constraint_mode == 'uniform'",
-                            radioButtons("monot", "Monotonicity:",
+                            radioButtons("monot", "Monotonicity basic:",
                                          choices = c("x" = "0", "up" = "1", "down" = "-1"),
                                          selected = "0", inline = TRUE),
                             radioButtons("conv", "Convexity:",
@@ -257,7 +258,7 @@ ui <- fluidPage(
                    column(12,
                           h5("Run Demos:"),
                           actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info"),
-                          actionButton("demo_monot", "Monotonicity", class = "btn-sm btn-info"),
+                          actionButton("demo_monot", "Monotonicity basic", class = "btn-sm btn-info"),
                           actionButton("demo_log", "Logistic", class = "btn-sm btn-info"),
                           actionButton("demo_temp", "Temperature", class = "btn-sm btn-info"),
                           actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info"),
@@ -1236,13 +1237,14 @@ server <- function(input, output, session) {
 
   # Exécuter les démos
   observeEvent(input$demo_comp, { execute_demo("comprehensive") })
-  observeEvent(input$demo_monot, { execute_demo("monotonicity") })
+  observeEvent(input$demo_monot, { execute_demo("monotonicity_basic") })
   observeEvent(input$demo_log, { execute_demo("logistic") })
   observeEvent(input$demo_temp, { execute_demo("temperature") })
   observeEvent(input$demo_temp2, { execute_demo("temperature2") })
   observeEvent(input$demo_conv, { execute_demo("convexity") })
   observeEvent(input$demo_degrees, { execute_demo("degrees_comparison") })
   observeEvent(input$demo_der3, { execute_demo("demo_der3") })
+  observeEvent(input$demo_derivatiev2, { execute_demo("derivative2") })
 
   # Afficher les résultats
   output$demo_plot <- renderPlot({
