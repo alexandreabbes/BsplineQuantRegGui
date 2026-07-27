@@ -5,7 +5,7 @@ account: bsplinequantreg
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 17632591
-bundleId: 12315315
+bundleId:
 url: https://bsplinequantreg.shinyapps.io/shiny/
 version: 1
 asMultiple: FALSE
