@@ -3,4 +3,4 @@
 #' @importFrom shinyjs useShinyjs
 #' @importFrom plotly plotlyOutput renderPlotly plot_ly
 #' @importFrom DT DTOutput renderDT datatable
-#' @import shinythemes
+#' @importFrom shinythemes shinytheme
