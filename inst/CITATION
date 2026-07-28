@@ -35,7 +35,7 @@ bibentry(
     "Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications.",
     "Zenodo. doi:10.5281/zenodo.17427913"
   )
-  )
+
 
 # 3. Python package (PyPI)
 bibentry(
