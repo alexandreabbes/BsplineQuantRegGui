@@ -6,12 +6,12 @@
 # shiny::runApp("R/run_gui.R")
 
 library(shiny)
-library(shinythemes)
 library(shinyjs)
 library(BsplineQuantReg)
 library(DT)
 library(plotly)
 library(colourpicker)
+library(shinythemes)
 
 # UI ----------------------------------------------------------------------
 

@@ -10,7 +10,6 @@ Description: A user-friendly interactive Shiny interface for the 'BsplineQuantRe
     knot placement, per-region constraint specification, 'CSV' data import, direct demo access, reproducible R code generation, and solver selection.
     This GUI is similar to the 'Python Tk' version 'BsplineQuantRegPy'.
 License: GPL-3
-URL: https://github.com/alexandreabbes/BsplineQuantRegGui/releases/tag/v0.1.0,
 Encoding: UTF-8
 Imports:
     BsplineQuantReg (>= 0.2.2),

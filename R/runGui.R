@@ -11,11 +11,13 @@
 #' @importFrom DT DTOutput renderDT datatable
 #' @importFrom shinythemes shinytheme
 #' @importFrom colourpicker colourInput
+#' @param brow Boolean if TRUE launches the default browser in the system.
+#'             If FALSE, only starts the server, reachable at the given IP address and port.
 #' @examples
 #' if (interactive()) {
 #'   runGui()
 #' }
-runGui <- function() {
+runGui <- function(brow=TRUE) {
   # Vérifier que 'BsplineQuantReg' est installé
   if (!requireNamespace("BsplineQuantReg", quietly = TRUE)) {
     stop(
@@ -33,5 +35,5 @@ runGui <- function() {
     )
   }
 
-  shiny::runApp(appDir, display.mode = "normal")
+  shiny::runApp(appDir, display.mode = "normal", launch.browser=brow)
 }
