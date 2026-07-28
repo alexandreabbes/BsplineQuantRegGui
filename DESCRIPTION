@@ -17,7 +17,7 @@ Imports:
     shiny,
     shinythemes,
     shinyjs,
-    BsplineQuantReg (>= 0.2.0),
+    BsplineQuantReg (>= 0.2.2),
     DT,
     plotly,
     colourpicker

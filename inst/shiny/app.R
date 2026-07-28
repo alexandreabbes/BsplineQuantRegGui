@@ -132,7 +132,7 @@ ui <- fluidPage(
           actionButton("demo_conv", "Convexity", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_der3", "3rd derivative", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_derivatiev2", "derivatiev2", class = "btn-sm btn-info", style = "flex:1;")
+          actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info", style = "flex:1;")
       ),
 
 
@@ -161,7 +161,7 @@ ui <- fluidPage(
 
                           conditionalPanel(
                             condition = "input.constraint_mode == 'uniform'",
-                            radioButtons("monot", "Monotonicity basic:",
+                            radioButtons("monot", "Monotonicity:",
                                          choices = c("x" = "0", "up" = "1", "down" = "-1"),
                                          selected = "0", inline = TRUE),
                             radioButtons("conv", "Convexity:",
@@ -264,23 +264,33 @@ ui <- fluidPage(
                           actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info"),
                           actionButton("demo_conv", "Convexity", class = "btn-sm btn-info"),
                           actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info"),
-                          actionButton("demo_der3", "3rd derivative", class = "btn-sm btn-info")
+                          actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info"),
+
                    )
                  ),
+                 div(id = "demo_area",
+                     style = "display: none; margin-top: 10px;",
+                     hr(),
+                     h4("Demo Results:"),
+                     div(
+                       style = "overflow: auto; width: 100%; max-height: 1800px;",
+                       plotOutput("demo_plot", height = 800)  # Hauteur par défaut, sera modifiée dynamiquement
+                     ),
+                     br(),
+                     verbatimTextOutput("demo_output")
+                 ),
 
-                 # Zone de résultats des démos (cachée par défaut)
-                 fluidRow(
-                   column(12,
-                          div(id = "demo_area",
-                              style = "display: none; margin-top: 10px;",
-                              hr(),
-                              h4("Demo Results:"),
-                              plotOutput("demo_plot", height = "500px"),
-                              br(),
-                              verbatimTextOutput("demo_output")
-                          )
-                   )
-                 )
+
+                 #div(id = "demo_area",
+                #     style = "display: none; margin-top: 10px;",
+                #     hr(),
+                #     h4("Demo Results:"),
+                #     plotOutput("demo_plot", width="auto", height = "1500px"),
+                #     br(),
+                #     verbatimTextOutput("demo_output")
+                # )
+
+
         ),
 
         tabPanel("Data",
@@ -1186,24 +1196,40 @@ server <- function(input, output, session) {
 
   demo_results <- reactiveValues(
     plot = NULL,
-    output = NULL
+    output = NULL,
+    height=800
   )
-
+  demo_heights <- list(
+    comprehensive = 800,
+    monotonicity = 800,
+    logistic = 800,
+    temperature = 800,
+    temperature2 = 800,
+    convexity = 800,
+    degrees_comparison = 800,
+    demo_der3 = 800,
+    derivative2 = 1800
+  )
   execute_demo <- function(demo_name) {
     showNotification(paste("Running demo:", demo_name), type = "message")
 
     withProgress(message = paste("Running", demo_name, "..."), {
 
+      # Récupérer la hauteur depuis la liste
+      demo_height <- demo_heights[[demo_name]] %||% 800
+      demo_width <- if (demo_name == "derivative2") 1500 else 800
       # Créer un fichier temporaire pour l'image
       temp_file <- tempfile(fileext = ".png")
 
       # Ouvrir un device PNG
-      png(temp_file, width = 800, height = 600, res = 100)
+
+      png(temp_file, width = demo_width, height = demo_height, res = 120)
 
       # Créer un environnement avec la variable degree
       demo_env <- new.env()
       demo_env$degree <- input$degree
       demo_env$par <- graphics::par
+      demo_results$height <- demo_height
 
       # Capturer la sortie
       output_text <- capture.output({
@@ -1244,7 +1270,7 @@ server <- function(input, output, session) {
   observeEvent(input$demo_conv, { execute_demo("convexity") })
   observeEvent(input$demo_degrees, { execute_demo("degrees_comparison") })
   observeEvent(input$demo_der3, { execute_demo("demo_der3") })
-  observeEvent(input$demo_derivatiev2, { execute_demo("derivative2") })
+  observeEvent(input$demo_derivative, { execute_demo("derivative2") })
 
   # Afficher les résultats
   output$demo_plot <- renderPlot({
