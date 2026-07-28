@@ -34,8 +34,8 @@ bibentry(
     "Abbes, A. (2025).",
     "Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications.",
     "Zenodo. doi:10.5281/zenodo.17427913"
-  )
-
+    )
+)
 
 # 3. Python package (PyPI)
 bibentry(
@@ -50,5 +50,6 @@ bibentry(
     "BsplineQuantRegpy: Python Implementation of B-Spline Quantile Regression.",
     "(Python package version 1.0.1).",
     "https://pypi.org/project/BsplineQuantRegpy/"
+  )
   )
 
