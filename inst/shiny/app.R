@@ -19,7 +19,9 @@ ui <- fluidPage(
   theme = shinytheme("flatly"),
   useShinyjs(),
 
-  tags$style(HTML("
+  tags$style(
+    HTML(
+      "
     .shiny-notification-success {
       background-color: #d4edda;
       border-color: #c3e6cb;
@@ -32,19 +34,22 @@ ui <- fluidPage(
       padding: 8px;
       margin: 4px 0;
     }
-  ")),
+  "
+    )
+  ),
 
   titlePanel(
-    h2("BsplineQuantReg - Quantile Regression with B-Splines under Shape Constraints",
-       align = "center", style = "color: #2c3e50;"),
+    h2(
+      "BsplineQuantReg - Quantile Regression with B-Splines under Shape Constraints",
+      align = "center",
+      style = "color: #2c3e50;"
+    ),
     windowTitle = "BsplineQuantReg"
   ),
   #themeSelector(),
   div(
     style = "position: absolute; top: 10px; right: 20px; z-index: 1000;",
-    actionButton("toggle_theme", "Themes",
-                 class = "btn-sm btn-outline-secondary",
-                 style = "border-radius: 20px; padding: 5px 15px;")
+    actionButton("toggle_theme", "Themes", class = "btn-sm btn-outline-secondary", style = "border-radius: 20px; padding: 5px 15px;")
   ),
 
   # Et la zone pour le themeSelector (cachée par défaut)
@@ -64,83 +69,158 @@ ui <- fluidPage(
       # ============ 1. DATA ============
       h3("1. Data", class = "text-primary"),
 
-      div(style = "display: flex; flex-wrap: wrap; gap: 5px;",
-        actionButton("test_data", "Test",
-                               class = "btn-sm btn-success", style = " background-color:#000000;"),
-        actionButton("temp_data", "Temp",
-                               class = "btn-sm btn-warning", style = "background-color:#FF0000;"),
-        actionButton("load_csv", "CSV",
-                               class = "btn-sm btn-info", style = "background-color:#10AA10;")
+      div(
+        style = "display: flex; flex-wrap: wrap; gap: 5px;",
+        actionButton("test_data", "Test", class = "btn-sm btn-success", style = " background-color:#000000;"),
+        actionButton("temp_data", "Temp", class = "btn-sm btn-warning", style = "background-color:#FF0000;"),
+        actionButton("load_csv", "CSV", class = "btn-sm btn-info", style = "background-color:#10AA10;")
       ),
       br(),
 
       h5("Interval:"),
       h6(fluidRow(
-        column(4, numericInput("data_xmin", "X min:", value = 0, step = 0.05),style = "padding-right: 1px;" ),
-        column(4, numericInput("data_xmax", "X max:", value = 1, step = 0.05),style = "padding-right: 1px;"),
-        column(4, numericInput("n_points", "n:", value = 100, min = 10, max = 1000),style = "padding-right: 1px;")
-        )),
+        column(
+          4,
+          numericInput("data_xmin", "X min:", value = 0, step = 0.05),
+          style = "padding-right: 1px;"
+        ),
+        column(
+          4,
+          numericInput("data_xmax", "X max:", value = 1, step = 0.05),
+          style = "padding-right: 1px;"
+        ),
+        column(
+          4,
+          numericInput(
+            "n_points",
+            "n:",
+            value = 100,
+            min = 10,
+            max = 1000
+          ),
+          style = "padding-right: 1px;"
+        )
+      )),
 
       p("Custom function:"),
-      fluidRow(
-        column(12, textInput("custom_func", NULL,
-                            value = "2*x + 0.5*sin(6*pi*x) + 0.2*rnorm(n)")),
+      fluidRow(column(
+        12,
+        textInput("custom_func", NULL, value = "2*x + 0.5*sin(6*pi*x) + 0.2*rnorm(n)")
+      ), ),
 
-      ),
-
-      actionButton("generate_custom", "Generate",
-                   class = "btn-sm btn-primary"),
+      actionButton("generate_custom", "Generate", class = "btn-sm btn-primary"),
 
       hr(),
 
       # ============ 2. SPLINE ============
       h3("2. Spline", class = "text-primary"),
 
-      fluidRow( column(6,numericInput("degree", "Degree:", value = 3, min = 1, max = 4)),
-              column(6,numericInput("knots_count", "Auto knots:", value = 10, min = 2, max = 30))
-      ),
+      fluidRow(column(
+        6, numericInput(
+          "degree",
+          "Degree:",
+          value = 3,
+          min = 1,
+          max = 4
+        )
+      ), column(
+        6,
+        numericInput(
+          "knots_count",
+          "Auto knots:",
+          value = 10,
+          min = 2,
+          max = 30
+        )
+      )),
 
-      fluidRow(
-        column(4, actionButton("add_knot_mode", "Add knot",
-                               class = "btn-sm btn-primary", style = "background-color:#FFDD00; color:#000000")),
-        column(4, actionButton("clear_knots", "Clear knots",
-                               class = "btn-sm btn-danger"))
-      ),
+      fluidRow(column(
+        4,
+        actionButton(
+          "add_knot_mode",
+          "Add knot",
+          class = "btn-sm btn-primary",
+          style = "background-color:#FFDD00; color:#000000"
+        )
+      ), column(
+        4,
+        actionButton("clear_knots", "Clear knots", class = "btn-sm btn-danger")
+      )),
       br(),
 
-      fluidRow(
-         sliderInput("tau", "Tau:", min = 0.05, max = 0.95, value = 0.5)),
+      fluidRow(sliderInput(
+        "tau",
+        "Tau:",
+        min = 0.05,
+        max = 0.95,
+        value = 0.5
+      )),
       br(),
-      fluidRow(
-        column(6, selectInput("solver", "Solver:",
-                              choices = c("CLARABEL","HIGHS","OSQP", "ECOS", "SCS","GUROBI"))),
-        column(6, selectInput("verbose", "Verbose ",
-                              choices = c( "FALSE","TRUE") ) )
-      ),
+      fluidRow(column(
+        6, selectInput(
+          "solver",
+          "Solver:",
+          choices = c("CLARABEL", "HIGHS", "OSQP", "ECOS", "SCS", "GUROBI")
+        )
+      ), column(
+        6, selectInput("verbose", "Verbose ", choices = c("FALSE", "TRUE"))
+      )),
 
       hr(),
 
       #  5. Demos" :
 
       h3("5. Demos", class = "text-primary"),
-      div(style = "display: flex; flex-wrap: wrap; gap: 5px;",
-          actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_monot", "Monotonicity Basic", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_log", "Logistic", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_temp", "Temperature", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_conv", "Convexity", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_der3", "Third derivative", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info", style = "flex:1;")
+      div(
+        style = "display: flex; flex-wrap: wrap; gap: 5px;",
+        actionButton(
+          "demo_comp",
+          "Comprehensive",
+          class = "btn-sm btn-info",
+          style = "flex:1;"
+        ),
+        actionButton(
+          "demo_monot",
+          "Monotonicity Basic",
+          class = "btn-sm btn-info",
+          style = "flex:1;"
+        ),
+        actionButton("demo_log", "Logistic", class = "btn-sm btn-info", style = "flex:1;"),
+        actionButton(
+          "demo_temp",
+          "Temperature",
+          class = "btn-sm btn-info",
+          style = "flex:1;"
+        ),
+        actionButton(
+          "demo_temp2",
+          "Temperature2",
+          class = "btn-sm btn-info",
+          style = "flex:1;"
+        ),
+        actionButton("demo_conv", "Convexity", class = "btn-sm btn-info", style = "flex:1;"),
+        actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info", style = "flex:1;"),
+        actionButton(
+          "demo_der3",
+          "Third derivative",
+          class = "btn-sm btn-info",
+          style = "flex:1;"
+        ),
+        actionButton(
+          "demo_derivative",
+          "Derivative",
+          class = "btn-sm btn-info",
+          style = "flex:1;"
+        )
       ),
 
 
 
-      div(style = "font-size: 11px; color: #666; text-align: center;",
-          p("BsplineQuantReg v0.2.0"),
-          p("Based on Karlin-Studden (1966)"),
-          a("GitHub", href = "https://github.com/alexandreabbes/BsplineQuantReg", target = "_blank")
+      div(
+        style = "font-size: 11px; color: #666; text-align: center;",
+        p("BsplineQuantReg v0.2.0"),
+        p("Based on Karlin-Studden (1966)"),
+        a("GitHub", href = "https://github.com/alexandreabbes/BsplineQuantReg", target = "_blank")
       )
     ),
 
@@ -148,202 +228,254 @@ ui <- fluidPage(
       width = 9,
 
       tabsetPanel(
-        tabPanel("Visualization",
-                 br(),
-                 fluidRow(
-                   column(9, plotlyOutput("spline_plot", height = "500px")),
+        tabPanel(
+          "Visualization",
+          br(),
+          fluidRow(
+            column(9, plotlyOutput("spline_plot", height = "500px")),
 
-                   column(3,
-                          h3("3. Constraints", class = "text-primary"),
-                          radioButtons("constraint_mode", "Mode:",
-                                       choices = c("Uniform" = "uniform", "Per region" = "region"),
-                                       selected = "uniform", inline = TRUE),
+            column(
+              3,
+              h3("3. Constraints", class = "text-primary"),
+              radioButtons(
+                "constraint_mode",
+                "Mode:",
+                choices = c("Uniform" = "uniform", "Per region" = "region"),
+                selected = "uniform",
+                inline = TRUE
+              ),
 
-                          conditionalPanel(
-                            condition = "input.constraint_mode == 'uniform'",
-                            radioButtons("monot", "Monotonicity:",
-                                         choices = c("x" = "0", "up" = "1", "down" = "-1"),
-                                         selected = "0", inline = TRUE),
-                            radioButtons("conv", "Convexity:",
-                                         choices = c("x" = "0", "U" = "1", "n" = "-1"),
-                                         selected = "0", inline = TRUE),
-                            conditionalPanel(
-                              condition = "input.degree >= 3",
-                              radioButtons("der3", "Third Derivative:",
-                                           choices = c("x" = "0", "+" = "1", "-" = "-1"),
-                                           selected = "0", inline = TRUE)
-                            )
-                          ),
-
-                          conditionalPanel(
-                            condition = "input.constraint_mode == 'region'",
-                            div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
-                                "1. Click 'Select'"),
-                            div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
-                                "2. Select a region on the plot"),
-                            div(style = "font-size: 13px; color: #555; margin-bottom: 10px;",
-                                "3. X min/max fields are updated"),
-
-                            fluidRow(
-                              column(6, actionButton("start_selection", "Select",
-                                                     class = "btn-sm btn-warning", style = "width:100%;")),
-                              column(6, actionButton("clear_regions", "Cancel region",
-                                                     class = "btn-sm btn-danger", style = "width:100%;"))
-                            ),
-                            br(),
-
-                            fluidRow(
-                              column(6, numericInput("region_xmin", "X min:", value = 0.3, step = 0.05)),
-                              column(6, numericInput("region_xmax", "X max:", value = 0.6, step = 0.05))
-                            ),
-
-                            radioButtons("region_monot", "Monotonicity:",
-                                         choices = c("x" = "0", "up" = "1", "down" = "-1"),
-                                         selected = "0", inline = TRUE),
-                            radioButtons("region_conv", "Convexity:",
-                                         choices = c("x" = "0", "U" = "1", "n" = "-1"),
-                                         selected = "0", inline = TRUE),
-                            conditionalPanel(
-                              condition = "input.degree >= 3",
-                              radioButtons("region_der3", "Third Derivative:",
-                                           choices = c("x" = "0", "+" = "1", "-" = "-1"),
-                                           selected = "0", inline = TRUE)
-                            ),
-
-
-                            fluidRow(
-                              column(6, actionButton("add_region", "Add region",
-                                                     class = "btn-sm btn-primary", style = "width:100%;")),
-                              column(6, actionButton("update_region", "Update",
-                                                     class = "btn-sm btn-info", style = "width:100%;"))
-                            ),
-                            br(),
-                            div(id = "regions_list", style = "max-height: 120px; overflow-y: auto;")
-                          ),
-
-                          # ============ 4. EXECUTION ============
-
-                          h3("4. Execution"),
-                          h5("Color:"),
-                          fluidRow(
-                           column(6, colourpicker::colourInput("curve_color", NULL, value = "blue")),
-                           column(6, actionButton("apply_color", "Apply", class = "btn-sm") )
-                          ),
-
-                          p("Curves:", textOutput("curve_count", inline = TRUE)),
-
-
-                          actionButton("run", "Run",
-                                       class = "btn-success btn-lg"),
-
-                          fluidRow(
-                            actionButton("clear_all", "Clear all", class = "btn-sm btn-danger"),
-                            actionButton("clear_curves", "Clear curves",class = "btn-sm btn-warning")
-                          ),
-                   )
-                 ),
-                 br(),
-
-
-                 # Information (unique)
-                 fluidRow(
-                   column(6, h5("Information"), verbatimTextOutput("fit_info")),
-                   column(6, h5("List of knots"), verbatimTextOutput("knots_compact", placeholder = TRUE))
-                 ),
-
-                 hr(),
-
-                 # Demos
-                 fluidRow(
-                   column(12,
-                          h5("Run Demos:"),
-                          actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info"),
-                          actionButton("demo_monot", "Monotonicity basic", class = "btn-sm btn-info"),
-                          actionButton("demo_log", "Logistic", class = "btn-sm btn-info"),
-                          actionButton("demo_temp", "Temperature", class = "btn-sm btn-info"),
-                          actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info"),
-                          actionButton("demo_conv", "Convexity", class = "btn-sm btn-info"),
-                          actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info"),
-                          actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info"),
-                          actionButton("demo_der3", "Third derivative", class = "btn-sm btn-info")
-                   )
-                 ),
-                 div(id = "demo_area",
-                     style = "display: none; margin-top: 10px;",
-                     hr(),
-                     h4("Demo Results:"),
-                     div(
-                       style = "overflow: auto; width: 100%; max-height: 1800px;",
-                       plotOutput("demo_plot", height = 800)  # Hauteur par défaut, sera modifiée dynamiquement
-                     ),
-                     br(),
-                     verbatimTextOutput("demo_output")
-                 ),
-
-
-                 #div(id = "demo_area",
-                #     style = "display: none; margin-top: 10px;",
-                #     hr(),
-                #     h4("Demo Results:"),
-                #     plotOutput("demo_plot", width="auto", height = "1500px"),
-                #     br(),
-                #     verbatimTextOutput("demo_output")
-                # )
-
-
-        ),
-
-        tabPanel("Data",
-                 br(),
-                 fluidRow(
-                   column(6, h4("Summary"), verbatimTextOutput("data_summary")),
-                   column(6, h4("Knots"), verbatimTextOutput("knots_info"))
-                 ),
-                 br(),
-                 DTOutput("data_table")
-        ),
-
-        tabPanel("R Code",
-                 br(),
-                 h4("R Code to reproduce the analysis:"),
-                 verbatimTextOutput("r_code")
-        ),
-
-        tabPanel("Regions",
-                 br(),
-                 h4("Defined Regions"),
-                 verbatimTextOutput("regions_info"),
-                 br(),
-                 fluidRow(
-                   column(6, h5("Active regions"), uiOutput("regions_list_ui")),
-                   column(6, h5("Instructions"),
-                          p("1. Mode 'Per region'"),
-                          p("2. 'Select' a rectangle on the plot"),
-                          p("3. Select constraints"),
-                          p("4. 'Add region'")
-                   )
-                 )
+              conditionalPanel(
+                condition = "input.constraint_mode == 'uniform'",
+                radioButtons(
+                  "monot",
+                  "Monotonicity:",
+                  choices = c("x" = "0", "up" = "1", "down" = "-1"),
+                  selected = "0",
+                  inline = TRUE
                 ),
-        tabPanel("Console",
-                 br(),
-                 fluidRow(
-                   column(12,
-                          div(style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;",
-                              h4("Console Output", style = "margin: 0;"),
-                              actionButton("clear_console", "Clear Console",
-                                           icon = icon("eraser"),
-                                           class = "btn-sm btn-danger")
-                          ),
-                          div(
-                            style = "background-color: #1e1e1e; color: #d4d4d4; padding: 15px;
+                radioButtons(
+                  "conv",
+                  "Convexity:",
+                  choices = c("x" = "0", "U" = "1", "n" = "-1"),
+                  selected = "0",
+                  inline = TRUE
+                ),
+                conditionalPanel(
+                  condition = "input.degree >= 3",
+                  radioButtons(
+                    "der3",
+                    "Third Derivative:",
+                    choices = c("x" = "0", "+" = "1", "-" = "-1"),
+                    selected = "0",
+                    inline = TRUE
+                  )
+                )
+              ),
+
+              conditionalPanel(
+                condition = "input.constraint_mode == 'region'",
+                div(style = "font-size: 13px; color: #555; margin-bottom: 10px;", "1. Click 'Select'"),
+                div(style = "font-size: 13px; color: #555; margin-bottom: 10px;", "2. Select a region on the plot"),
+                div(style = "font-size: 13px; color: #555; margin-bottom: 10px;", "3. X min/max fields are updated"),
+
+                fluidRow(column(
+                  6,
+                  actionButton(
+                    "start_selection",
+                    "Select",
+                    class = "btn-sm btn-warning",
+                    style = "width:100%;"
+                  )
+                ), column(
+                  6,
+                  actionButton(
+                    "clear_regions",
+                    "Cancel region",
+                    class = "btn-sm btn-danger",
+                    style = "width:100%;"
+                  )
+                )),
+                br(),
+
+                fluidRow(column(
+                  6, numericInput("region_xmin", "X min:", value = 0.3, step = 0.05)
+                ), column(
+                  6, numericInput("region_xmax", "X max:", value = 0.6, step = 0.05)
+                )),
+
+                radioButtons(
+                  "region_monot",
+                  "Monotonicity:",
+                  choices = c("x" = "0", "up" = "1", "down" = "-1"),
+                  selected = "0",
+                  inline = TRUE
+                ),
+                radioButtons(
+                  "region_conv",
+                  "Convexity:",
+                  choices = c("x" = "0", "U" = "1", "n" = "-1"),
+                  selected = "0",
+                  inline = TRUE
+                ),
+                conditionalPanel(
+                  condition = "input.degree >= 3",
+                  radioButtons(
+                    "region_der3",
+                    "Third Derivative:",
+                    choices = c("x" = "0", "+" = "1", "-" = "-1"),
+                    selected = "0",
+                    inline = TRUE
+                  )
+                ),
+
+
+                fluidRow(column(
+                  6,
+                  actionButton("add_region", "Add region", class = "btn-sm btn-primary", style = "width:100%;")
+                ), column(
+                  6,
+                  actionButton("update_region", "Update", class = "btn-sm btn-info", style = "width:100%;")
+                )),
+                br(),
+                div(id = "regions_list", style = "max-height: 120px; overflow-y: auto;")
+              ),
+
+              # ============ 4. EXECUTION ============
+
+              h3("4. Execution"),
+              h5("Color:"),
+              fluidRow(
+                column(
+                  6,
+                  colourpicker::colourInput("curve_color", NULL, value = "blue")
+                ),
+                column(6, actionButton("apply_color", "Apply", class = "btn-sm"))
+              ),
+
+              p("Curves:", textOutput("curve_count", inline = TRUE)),
+
+
+              actionButton("run", "Run", class = "btn-success btn-lg"),
+
+              fluidRow(
+                actionButton("clear_all", "Clear all", class = "btn-sm btn-danger"),
+                actionButton("clear_curves", "Clear curves", class = "btn-sm btn-warning")
+              ),
+            )
+          ),
+          br(),
+
+
+          # Information (unique)
+          fluidRow(
+            column(6, h5("Information"), verbatimTextOutput("fit_info")),
+            column(
+              6,
+              h5("List of knots"),
+              verbatimTextOutput("knots_compact", placeholder = TRUE)
+            )
+          ),
+
+          hr(),
+
+          # Demos
+          fluidRow(
+            column(
+              12,
+              h5("Run Demos:"),
+              actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info"),
+              actionButton("demo_monot", "Monotonicity basic", class = "btn-sm btn-info"),
+              actionButton("demo_log", "Logistic", class = "btn-sm btn-info"),
+              actionButton("demo_temp", "Temperature", class = "btn-sm btn-info"),
+              actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info"),
+              actionButton("demo_conv", "Convexity", class = "btn-sm btn-info"),
+              actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info"),
+              actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info"),
+              actionButton("demo_der3", "Third derivative", class = "btn-sm btn-info")
+            )
+          ),
+          div(
+            id = "demo_area",
+            style = "display: none; margin-top: 10px;",
+            hr(),
+            h4("Demo Results:"),
+            div(
+              style = "overflow: auto; width: 100%; max-height: 1800px;",
+              plotOutput("demo_plot", height = 800)  # Hauteur par défaut, sera modifiée dynamiquement
+            ),
+            br(),
+            verbatimTextOutput("demo_output")
+          ),
+
+
+          #div(id = "demo_area",
+          #     style = "display: none; margin-top: 10px;",
+          #     hr(),
+          #     h4("Demo Results:"),
+          #     plotOutput("demo_plot", width="auto", height = "1500px"),
+          #     br(),
+          #     verbatimTextOutput("demo_output")
+          # )
+
+
+        ),
+
+        tabPanel(
+          "Data",
+          br(),
+          fluidRow(
+            column(6, h4("Summary"), verbatimTextOutput("data_summary")),
+            column(6, h4("Knots"), verbatimTextOutput("knots_info"))
+          ),
+          br(),
+          DTOutput("data_table")
+        ),
+
+        tabPanel(
+          "R Code",
+          br(),
+          h4("R Code to reproduce the analysis:"),
+          verbatimTextOutput("r_code")
+        ),
+
+        tabPanel(
+          "Regions",
+          br(),
+          h4("Defined Regions"),
+          verbatimTextOutput("regions_info"),
+          br(),
+          fluidRow(column(
+            6, h5("Active regions"), uiOutput("regions_list_ui")
+          ), column(
+            6,
+            h5("Instructions"),
+            p("1. Mode 'Per region'"),
+            p("2. 'Select' a rectangle on the plot"),
+            p("3. Select constraints"),
+            p("4. 'Add region'")
+          ))
+        ),
+        tabPanel("Console", br(), fluidRow(column(
+          12,
+          div(
+            style = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;",
+            h4("Console Output", style = "margin: 0;"),
+            actionButton(
+              "clear_console",
+              "Clear Console",
+              icon = icon("eraser"),
+              class = "btn-sm btn-danger"
+            )
+          ),
+          div(
+            style = "background-color: #1e1e1e; color: #d4d4d4; padding: 15px;
                  border-radius: 5px; font-family: 'Courier New', monospace;
                  font-size: 13px; height: 400px; overflow-y: auto;
                  white-space: pre-wrap; word-wrap: break-word;",
-                            verbatimTextOutput("console_output")
-                          )
-                   )
-                 )
-        )
+            verbatimTextOutput("console_output")
+          )
+        )))
       )
     )
   )
@@ -352,7 +484,6 @@ ui <- fluidPage(
 # SERVER ------------------------------------------------------------------
 
 server <- function(input, output, session) {
-
   #Theme selector
   # Dans le server, ajoutez :
   observeEvent(input$toggle_theme, {
@@ -380,15 +511,19 @@ server <- function(input, output, session) {
 
   # ============ CONSTRAINT SYMBOL FUNCTION ============
   get_sym <- function(val, symbols) {
-    if (is.null(val) || is.na(val)) return("x")
+    if (is.null(val) || is.na(val))
+      return("x")
     val <- as.numeric(val)
-    if (!val %in% c(-1, 0, 1)) return("x")
+    if (!val %in% c(-1, 0, 1))
+      return("x")
     return(symbols[val + 2])
   }
 
   # ============ FIELD UPDATE FUNCTION ============
   update_region_fields <- function(xmin, xmax) {
-    if (is.null(xmin) || is.null(xmax) || is.na(xmin) || is.na(xmax)) return()
+    if (is.null(xmin) ||
+        is.null(xmax) || is.na(xmin) || is.na(xmax))
+      return()
     if (xmin >= xmax) {
       showNotification("X min must be less than X max", type = "warning")
       return()
@@ -429,7 +564,7 @@ server <- function(input, output, session) {
       xmin <- input$data_xmin
       xmax <- input$data_xmax
       x <- as.vector(seq(xmin, xmax, length.out = n))
-      y <- as.vector(2*x + 0.2*sin(10*pi*x) + 0.05*rnorm(n))
+      y <- as.vector(2 * x + 0.2 * sin(10 * pi * x) + 0.05 * rnorm(n))
       values$xtab <- x
       values$ytab <- y
       values$data_name <- paste("Test [", xmin, ",", xmax, "]")
@@ -443,18 +578,113 @@ server <- function(input, output, session) {
   observeEvent(input$temp_data, {
     withProgress(message = "Loading...", {
       temp_data <- c(
-        -0.32, -0.32, -0.40, -0.39, -0.65, -0.43, -0.40, -0.52, -0.30, -0.12,
-        -0.40, -0.42, -0.39, -0.45, -0.35, -0.36, -0.19, -0.14, -0.37, -0.22,
-        0.00, -0.08, -0.24, -0.36, -0.49, -0.27, -0.19, -0.43, -0.29, -0.30,
-        -0.29, -0.29, -0.28, -0.23, -0.04, -0.02, -0.24, -0.42, -0.35, -0.16,
-        -0.17, -0.09, -0.13, -0.16, -0.14, -0.14,  0.10, -0.03,  0.03, -0.18,
-        -0.06,  0.04,  0.02, -0.13,  0.03, -0.06,  0.02,  0.13,  0.13, -0.03,
-        0.15,  0.12,  0.10,  0.04,  0.11, -0.04,  0.01,  0.13, -0.01, -0.06,
-        -0.14, -0.02,  0.04,  0.14, -0.07, -0.06, -0.17,  0.10,  0.10,  0.05,
-        -0.01,  0.08,  0.02,  0.02, -0.26, -0.16, -0.09, -0.02, -0.12,  0.03,
-        0.04, -0.11, -0.07,  0.19, -0.07, -0.05, -0.22,  0.16,  0.09,  0.14,
-        0.28,  0.39,  0.07,  0.29,  0.11,  0.11,  0.16,  0.32,  0.35,  0.25,
-        0.47,  0.41,  0.13
+        -0.32,
+        -0.32,
+        -0.40,
+        -0.39,
+        -0.65,
+        -0.43,
+        -0.40,
+        -0.52,
+        -0.30,
+        -0.12,-0.40,
+        -0.42,
+        -0.39,
+        -0.45,
+        -0.35,
+        -0.36,
+        -0.19,
+        -0.14,
+        -0.37,
+        -0.22,
+        0.00,
+        -0.08,
+        -0.24,
+        -0.36,
+        -0.49,
+        -0.27,
+        -0.19,
+        -0.43,
+        -0.29,
+        -0.30,-0.29,
+        -0.29,
+        -0.28,
+        -0.23,
+        -0.04,
+        -0.02,
+        -0.24,
+        -0.42,
+        -0.35,
+        -0.16,-0.17,
+        -0.09,
+        -0.13,
+        -0.16,
+        -0.14,
+        -0.14,
+        0.10,
+        -0.03,
+        0.03,
+        -0.18,-0.06,
+        0.04,
+        0.02,
+        -0.13,
+        0.03,
+        -0.06,
+        0.02,
+        0.13,
+        0.13,
+        -0.03,
+        0.15,
+        0.12,
+        0.10,
+        0.04,
+        0.11,
+        -0.04,
+        0.01,
+        0.13,
+        -0.01,
+        -0.06,-0.14,
+        -0.02,
+        0.04,
+        0.14,
+        -0.07,
+        -0.06,
+        -0.17,
+        0.10,
+        0.10,
+        0.05,-0.01,
+        0.08,
+        0.02,
+        0.02,
+        -0.26,
+        -0.16,
+        -0.09,
+        -0.02,
+        -0.12,
+        0.03,
+        0.04,
+        -0.11,
+        -0.07,
+        0.19,
+        -0.07,
+        -0.05,
+        -0.22,
+        0.16,
+        0.09,
+        0.14,
+        0.28,
+        0.39,
+        0.07,
+        0.29,
+        0.11,
+        0.11,
+        0.16,
+        0.32,
+        0.35,
+        0.25,
+        0.47,
+        0.41,
+        0.13
       )
       years <- 1880:1992
       x <- (years - 1880) / (1992 - 1880)
@@ -497,22 +727,22 @@ server <- function(input, output, session) {
 
   # ============ KNOTS ============
 
-  observe(
-    {
+  observe({
     if (!is.null(values$xtab) && length(values$manual_knots) == 0)
-      {
+    {
       if (!is.na(input$knots_count))
-        {
-      kn <- max((input$knots_count),2)-1
+      {
+        kn <- max((input$knots_count), 2) - 1
 
-      #if (is.na(knots_count)){knots_count=2}
-      values$knots <- quantile(values$xtab, probs = ((0:(kn))/(kn)) )
+        #if (is.na(knots_count)){knots_count=2}
+        values$knots <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
       }
       else{
-        kn=1
-      values$knots=c(0,1)
+        kn = 1
+        values$knots = c(0, 1)
       }
-  }} )
+    }
+  })
 
   output$knots_compact <- renderPrint({
     if (!is.null(values$knots) && length(values$knots) > 0) {
@@ -560,8 +790,8 @@ server <- function(input, output, session) {
   observeEvent(input$clear_knots, {
     values$manual_knots <- list()
     if (!is.null(values$xtab)) {
-      kn <- max(input$knots_count, 2)-1
-      values$knots <- quantile(values$xtab, probs = (0:(kn)) / (kn) )
+      kn <- max(input$knots_count, 2) - 1
+      values$knots <- quantile(values$xtab, probs = (0:(kn)) / (kn))
     }
     showNotification("Knots reset", type = "message")
   })
@@ -590,10 +820,14 @@ server <- function(input, output, session) {
           updateNumericInput(session, "region_xmax", value = round(xmax, 3))
           values$selecting_region <- FALSE
           updateActionButton(session, "start_selection", label = "Select")
-          showNotification(
-            paste("Region selected: [", round(xmin, 3), ", ", round(xmax, 3), "]"),
-            type = "message"
-          )
+          showNotification(paste(
+            "Region selected: [",
+            round(xmin, 3),
+            ", ",
+            round(xmax, 3),
+            "]"
+          ),
+          type = "message")
         }
       }
     }
@@ -625,7 +859,8 @@ server <- function(input, output, session) {
 
   observeEvent(input$update_region, {
     if (!is.null(values$selected_region_id)) {
-      idx <- which(sapply(values$regions, function(r) r$id == values$selected_region_id))
+      idx <- which(sapply(values$regions, function(r)
+        r$id == values$selected_region_id))
       if (length(idx) > 0) {
         values$regions[[idx]]$xmin <- input$region_xmin
         values$regions[[idx]]$xmax <- input$region_xmax
@@ -652,8 +887,10 @@ server <- function(input, output, session) {
       showNotification("Invalid ID", type = "warning")
       return()
     }
-    values$regions <- values$regions[!sapply(values$regions, function(r) r$id == id)]
-    if (!is.null(values$selected_region_id) && values$selected_region_id == id) {
+    values$regions <- values$regions[!sapply(values$regions, function(r)
+      r$id == id)]
+    if (!is.null(values$selected_region_id) &&
+        values$selected_region_id == id) {
       values$selected_region_id <- NULL
     }
     showNotification(paste("Region", id, "deleted"), type = "message")
@@ -675,8 +912,10 @@ server <- function(input, output, session) {
         return(rep(as.numeric(val), len))
       }
       v <- as.numeric(val)
-      if (length(v) > len) return(v[1:len])
-      if (length(v) < len) return(c(v, rep(0, len - length(v))))
+      if (length(v) > len)
+        return(v[1:len])
+      if (length(v) < len)
+        return(c(v, rep(0, len - length(v))))
       return(v)
     }
 
@@ -687,13 +926,14 @@ server <- function(input, output, session) {
     } else {
       monot <- rep(0, kn)
       conv <- rep(0, kn + 1)
-      der3 <- rep(0, kn+1)
+      der3 <- rep(0, kn + 1)
       for (region in values$regions) {
         for (i in 1:kn) {
           x1 <- values$knots[i]
           x2 <- values$knots[i + 1]
           if (x2 > region$xmin && x1 < region$xmax) {
-            if (region$monot != 0) monot[i] <- region$monot
+            if (region$monot != 0)
+              monot[i] <- region$monot
             if (region$conv != 0) {
               conv[i] <- region$conv
               conv[i + 1] <- region$conv
@@ -713,24 +953,31 @@ server <- function(input, output, session) {
       der3_val <- as.numeric(input$der3)
 
       # Remplacer NA par 0
-      if (is.na(monot_val)) monot_val <- 0
-      if (is.na(conv_val)) conv_val <- 0
-      if (is.na(der3_val)) der3_val <- 0
+      if (is.na(monot_val))
+        monot_val <- 0
+      if (is.na(conv_val))
+        conv_val <- 0
+      if (is.na(der3_val))
+        der3_val <- 0
 
-      monot <- rep(monot_val, kn +1 )
+      monot <- rep(monot_val, kn + 1)
       conv <- rep(conv_val, kn + 1) # débordre pour le degre 2
-      der3 <- rep(der3_val, kn+1) # débordre pour le degre 3
+      der3 <- rep(der3_val, kn + 1) # débordre pour le degre 3
     }
-    if (degree < 3) der3 <- rep(0, kn+1)
+    if (degree < 3)
+      der3 <- rep(0, kn + 1)
 
-    list(monot = monot, conv = conv, der3 = der3)
+    list(monot = monot,
+         conv = conv,
+         der3 = der3)
   }
 
   # ============ CSV IMPORT ============
 
   observeEvent(input$load_csv, {
     file_path <- file.choose()
-    if (is.na(file_path)) return()
+    if (is.na(file_path))
+      return()
 
     tryCatch({
       df <- read.csv(file_path, header = TRUE)
@@ -763,11 +1010,17 @@ server <- function(input, output, session) {
       updateNumericInput(session, "data_xmax", value = max(values$xtab))
 
       values$manual_knots <- list()
-      kn <- max(input$knots_count, 2)-1
-      values$knots <- quantile(values$xtab, probs = (0: (kn))/(kn) )
+      kn <- max(input$knots_count, 2) - 1
+      values$knots <- quantile(values$xtab, probs = (0:(kn)) / (kn))
 
-      showNotification(paste("File loaded:", basename(file_path),
-                             "-", length(x_col), "points"), type = "success")
+      showNotification(paste(
+        "File loaded:",
+        basename(file_path),
+        "-",
+        length(x_col),
+        "points"
+      ),
+      type = "success")
 
     }, error = function(e) {
       showNotification(paste("Read error:", e$message), type = "error")
@@ -778,13 +1031,17 @@ server <- function(input, output, session) {
 
   observeEvent(input$load_excel, {
     if (!requireNamespace("readxl", quietly = TRUE)) {
-      showNotification("Install 'readxl' to read Excel files: install.packages('readxl')",
-                       type = "error", duration = 10)
+      showNotification(
+        "Install 'readxl' to read Excel files: install.packages('readxl')",
+        type = "error",
+        duration = 10
+      )
       return()
     }
 
     file_path <- file.choose()
-    if (is.na(file_path)) return()
+    if (is.na(file_path))
+      return()
 
     tryCatch({
       df <- readxl::read_excel(file_path)
@@ -818,11 +1075,17 @@ server <- function(input, output, session) {
       updateNumericInput(session, "data_xmax", value = max(values$xtab))
 
       values$manual_knots <- list()
-      kn <- max(input$knots_count, 2)-1
-      values$knots <- quantile(values$xtab, probs = (0:(kn))/(kn) )
+      kn <- max(input$knots_count, 2) - 1
+      values$knots <- quantile(values$xtab, probs = (0:(kn)) / (kn))
 
-      showNotification(paste("File loaded:", basename(file_path),
-                             "-", length(x_col), "points"), type = "success")
+      showNotification(paste(
+        "File loaded:",
+        basename(file_path),
+        "-",
+        length(x_col),
+        "points"
+      ),
+      type = "success")
 
     }, error = function(e) {
       showNotification(paste("Read error:", e$message), type = "error")
@@ -847,36 +1110,35 @@ server <- function(input, output, session) {
       return()
     }
 
-    withProgress(message = "Regression...",
-                 {
+    withProgress(message = "Regression...", {
       constraints <- build_constraints()
-      if (is.null(constraints)) return()
+      if (is.null(constraints))
+        return()
 
       log_console("=== Starting Regression ===")
       log_console(paste("Degree:", input$degree))
       log_console(paste("Solver:", input$solver))
 
-      console_text <- capture.output(type=c("message"),
-                                     append=FALSE,
-        fit <- tryCatch({
-          quantile_spline(
-            as.vector(values$xtab),
-            as.vector(values$ytab),
-            as.vector(values$knots),
-            tau = input$tau,
-            degree = input$degree,
-            monot = constraints$monot,
-            convcons = constraints$conv,
-            der3cons = constraints$der3,
-            solver = input$solver,
-            callable = TRUE,
-            verbose = as.logical(input$verbose)
-          )
-        }, error = function(e) {
-          cat("Error:", e$message, "\n")
-          NULL
-        })
-      )
+      console_text <- capture.output(type = c("message"),
+                                     append = FALSE,
+                                     fit <- tryCatch({
+                                       quantile_spline(
+                                         as.vector(values$xtab),
+                                         as.vector(values$ytab),
+                                         as.vector(values$knots),
+                                         tau = input$tau,
+                                         degree = input$degree,
+                                         monot = constraints$monot,
+                                         convcons = constraints$conv,
+                                         der3cons = constraints$der3,
+                                         solver = input$solver,
+                                         callable = TRUE,
+                                         verbose = as.logical(input$verbose)
+                                       )
+                                     }, error = function(e) {
+                                       cat("Error:", e$message, "\n")
+                                       NULL
+                                     }))
 
       #log_console(console_text)
 
@@ -885,14 +1147,15 @@ server <- function(input, output, session) {
         text <- gsub("G3;", "", text)
         text <- gsub("g", "", text)
         text <- trimws(text)
-        return(text)}
+        return(text)
+      }
 
       #log_console(clean_ansi(console_text))
 
       for (line in console_text) {
         if (nchar(line) > 0) {
-          line=clean_ansi(line)
-          log_console( paste(line))
+          line = clean_ansi(line)
+          log_console(paste(line))
         }
       }
 
@@ -905,16 +1168,18 @@ server <- function(input, output, session) {
         values$x_eval <- x_eval
         values$y_eval <- y_eval
         color <- input$curve_color
-        values$curve_lines <- c(values$curve_lines, list(list(x = x_eval, y = y_eval, color = color)))
+        values$curve_lines <- c(values$curve_lines, list(list(
+          x = x_eval,
+          y = y_eval,
+          color = color
+        )))
         showNotification("Regression successful!", type = "message")
         #lapply(console_text, function(line) if(nchar(line)>0) log_console(line))
 
 
       }
     })
-  }
-
-  )
+  })
 
   # ============ VISUALIZATION ============
 
@@ -925,9 +1190,15 @@ server <- function(input, output, session) {
 
     # Data
     p <- p %>% add_trace(
-      x = values$xtab, y = values$ytab,
-      type = "scatter", mode = "markers",
-      marker = list(color = "gray", size = 6, opacity = 0.5),
+      x = values$xtab,
+      y = values$ytab,
+      type = "scatter",
+      mode = "markers",
+      marker = list(
+        color = "gray",
+        size = 6,
+        opacity = 0.5
+      ),
       name = "Data"
     )
 
@@ -936,35 +1207,67 @@ server <- function(input, output, session) {
       y_range <- range(values$ytab)
       y_pos <- y_range[2] - 0.1 * diff(y_range)
       p <- p %>% add_trace(
-        x = values$knots, y = rep(y_pos, length(values$knots)),
-        type = "scatter", mode = "markers",
-        marker = list(color = "red", symbol = "triangle-down", size = 10),
+        x = values$knots,
+        y = rep(y_pos, length(values$knots)),
+        type = "scatter",
+        mode = "markers",
+        marker = list(
+          color = "red",
+          symbol = "triangle-down",
+          size = 10
+        ),
         name = "Knots"
       )
     }
 
     # Regions
-    if (input$constraint_mode == "region" && length(values$regions) > 0) {
+    if (input$constraint_mode == "region" &&
+        length(values$regions) > 0) {
       y_range <- range(values$ytab)
       for (region in values$regions) {
-        is_selected <- !is.null(values$selected_region_id) && values$selected_region_id == region$id
-        border_color <- if (is_selected) "#ff0000" else "rgba(255, 152, 0, 0.8)"
-        fill_color <- if (is_selected) "rgba(255, 0, 0, 0.15)" else "rgba(255, 152, 0, 0.15)"
+        is_selected <- !is.null(values$selected_region_id) &&
+          values$selected_region_id == region$id
+        border_color <- if (is_selected)
+          "#ff0000"
+        else
+          "rgba(255, 152, 0, 0.8)"
+        fill_color <- if (is_selected)
+          "rgba(255, 0, 0, 0.15)"
+        else
+          "rgba(255, 152, 0, 0.15)"
         p <- p %>% add_trace(
-          x = c(region$xmin, region$xmax, region$xmax, region$xmin, region$xmin),
+          x = c(
+            region$xmin,
+            region$xmax,
+            region$xmax,
+            region$xmin,
+            region$xmin
+          ),
           y = c(y_range[1], y_range[1], y_range[2], y_range[2], y_range[1]),
-          type = "scatter", mode = "lines",
+          type = "scatter",
+          mode = "lines",
           fill = "toself",
           fillcolor = fill_color,
           line = list(color = border_color, width = ifelse(is_selected, 3, 1)),
           name = paste0("Region ", region$id),
           hoverinfo = "text",
           text = paste0(
-            "Region ", region$id, "\n",
-            "[", round(region$xmin, 3), ", ", round(region$xmax, 3), "]\n",
-            "M: ", get_sym(region$monot, c("down", "x", "up")), "\n",
-            "C: ", get_sym(region$conv, c("n", "x", "U")), "\n",
-            "D3: ", get_sym(region$der3, c("-", "x", "+"))
+            "Region ",
+            region$id,
+            "\n",
+            "[",
+            round(region$xmin, 3),
+            ", ",
+            round(region$xmax, 3),
+            "]\n",
+            "M: ",
+            get_sym(region$monot, c("down", "x", "up")),
+            "\n",
+            "C: ",
+            get_sym(region$conv, c("n", "x", "U")),
+            "\n",
+            "D3: ",
+            get_sym(region$der3, c("-", "x", "+"))
           )
         )
       }
@@ -973,8 +1276,10 @@ server <- function(input, output, session) {
     # Curves
     for (curve in values$curve_lines) {
       p <- p %>% add_trace(
-        x = curve$x, y = curve$y,
-        type = "scatter", mode = "lines",
+        x = curve$x,
+        y = curve$y,
+        type = "scatter",
+        mode = "lines",
         line = list(color = curve$color, width = 2),
         name = paste0("tau=", input$tau)
       )
@@ -983,9 +1288,11 @@ server <- function(input, output, session) {
     # Annotation
     p <- p %>% layout(
       annotations = list(
-        x = 0.02, y = 0.98,
+        x = 0.02,
+        y = 0.98,
         text = paste("Knots:", length(values$knots)),
-        xref = "paper", yref = "paper",
+        xref = "paper",
+        yref = "paper",
         showarrow = FALSE,
         font = list(size = 12, color = "red")
       ),
@@ -993,7 +1300,11 @@ server <- function(input, output, session) {
       yaxis = list(title = "y"),
       hovermode = "closest",
       legend = list(orientation = "h", y = -0.1),
-      dragmode = if (values$selecting_region && input$constraint_mode == "region") "select" else "zoom"
+      dragmode = if (values$selecting_region &&
+                     input$constraint_mode == "region")
+        "select"
+      else
+        "zoom"
     )
 
     p <- p %>% config(
@@ -1026,11 +1337,8 @@ server <- function(input, output, session) {
       }
     }
 
-  }
-
-
-  )
-    # ============ OUTPUTS ============
+  })
+  # ============ OUTPUTS ============
 
   # = INFO =
   output$fit_info <- renderPrint({
@@ -1040,32 +1348,40 @@ server <- function(input, output, session) {
         return()
       } else
       {
-      # Extraire les informations
-      info <- list(
-        degree = NA,
-        knots = NA,
-        coeff = NA,
-        status = NA
-      )
+        # Extraire les informations
+        info <- list(
+          degree = NA,
+          knots = NA,
+          coeff = NA,
+          status = NA
+        )
 
-      if (inherits(input$fit, "callable_spline")) {
-        params <- get_parameters(input$fit)
-        info$degree <- params$degree
-        info$knots <- params$knot
-        info$coeff <- params$coeff
-        info$status <- if (!is.null(params$result)) params$result$status else NA
-      }
-      cat("Status: Success\n")
-      cat("Degree:", if (!is.na(info$degree)) info$degree else "unknown", "\n")
-      cat("Tau:", input$tau, "\n")
-      cat("Knots:", length(info$knots %||% values$knots), "\n")
-      cat("Coefficients:", length(info$coeff %||% numeric(0)), "\n")
-      if (!is.na(info$status)) {
-        cat("Solver status:", info$status, "\n")
+        if (inherits(input$fit, "callable_spline")) {
+          params <- get_parameters(input$fit)
+          info$degree <- params$degree
+          info$knots <- params$knot
+          info$coeff <- params$coeff
+          info$status <- if (!is.null(params$result))
+            params$result$status
+          else
+            NA
+        }
+        cat("Status: Success\n")
+        cat("Degree:", if (!is.na(info$degree))
+          info$degree
+          else
+            "unknown", "\n")
+        cat("Tau:", input$tau, "\n")
+        cat("Knots:", length(info$knots %||% values$knots), "\n")
+        cat("Coefficients:",
+            length(info$coeff %||% numeric(0)),
+            "\n")
+        if (!is.na(info$status)) {
+          cat("Solver status:", info$status, "\n")
+        }
       }
     }
-      }
-      , error = function(e) {
+    , error = function(e) {
       cat("Error displaying fit info:", e$message)
     })
 
@@ -1073,38 +1389,63 @@ server <- function(input, output, session) {
 
 
   # = Curve cournt =
-  output$curve_count <- renderText({ length(values$curve_lines) })
+  output$curve_count <- renderText({
+    length(values$curve_lines)
+  })
 
-    # regions
+  # regions
   output$regions_list_ui <- renderUI({
     if (length(values$regions) == 0) {
       return(p("No regions", style = "color: #999;"))
     }
     tags$div(lapply(values$regions, function(r) {
-      is_selected <- !is.null(values$selected_region_id) && values$selected_region_id == r$id
+      is_selected <- !is.null(values$selected_region_id) &&
+        values$selected_region_id == r$id
       tags$div(
         class = "region-box",
-        style = if (is_selected) "border: 3px solid #ff0000; background-color: rgba(255,0,0,0.1);",
-        tags$div(style = "display: flex; justify-content: space-between;",
-                 tags$span(style = "font-weight: bold;",
-                           paste0("Region ", r$id, " [", round(r$xmin, 3), ", ", round(r$xmax, 3), "]")),
-                 actionButton(paste0("del_", r$id), "x", class = "btn-sm btn-danger",
-                              style = "padding: 0px 6px;",
-                              onclick = paste0("Shiny.setInputValue('delete_region', ", r$id, ")"))
+        style = if (is_selected)
+          "border: 3px solid #ff0000; background-color: rgba(255,0,0,0.1);",
+        tags$div(
+          style = "display: flex; justify-content: space-between;",
+          tags$span(
+            style = "font-weight: bold;",
+            paste0(
+              "Region ",
+              r$id,
+              " [",
+              round(r$xmin, 3),
+              ", ",
+              round(r$xmax, 3),
+              "]"
+            )
+          ),
+          actionButton(
+            paste0("del_", r$id),
+            "x",
+            class = "btn-sm btn-danger",
+            style = "padding: 0px 6px;",
+            onclick = paste0("Shiny.setInputValue('delete_region', ", r$id, ")")
+          )
         ),
-        tags$div(style = "font-size: 12px; color: #555;",
-                 paste0(
-                   "M: ", get_sym(r$monot, c("down", "x", "up")),
-                   " | C: ", get_sym(r$conv, c("n", "x", "U")),
-                   " | D3: ", get_sym(r$der3, c("-", "x", "+"))
-                 )
+        tags$div(
+          style = "font-size: 12px; color: #555;",
+          paste0(
+            "M: ",
+            get_sym(r$monot, c("down", "x", "up")),
+            " | C: ",
+            get_sym(r$conv, c("n", "x", "U")),
+            " | D3: ",
+            get_sym(r$der3, c("-", "x", "+"))
+          )
         )
       )
     }))
   })
 
   output$data_summary <- renderPrint({
-    if (is.null(values$xtab)) { cat("No data") } else {
+    if (is.null(values$xtab)) {
+      cat("No data")
+    } else {
       cat("Source:", values$data_name, "\n")
       cat("Points:", length(values$xtab), "\n")
       cat("x: [", min(values$xtab), ",", max(values$xtab), "]\n")
@@ -1113,16 +1454,22 @@ server <- function(input, output, session) {
   })
 
   output$knots_info <- renderPrint({
-    if (is.null(values$knots)) { cat("No knots") } else {
+    if (is.null(values$knots)) {
+      cat("No knots")
+    } else {
       cat("Knots:", length(values$knots), "\n")
       print(round(values$knots, 4))
     }
   })
 
   output$data_table <- renderDT({
-    if (is.null(values$xtab)) return(NULL)
-    datatable(data.frame(x = round(values$xtab, 4), y = round(values$ytab, 4)),
-              options = list(pageLength = 10, scrollX = TRUE))
+    if (is.null(values$xtab))
+      return(NULL)
+    datatable(data.frame(
+      x = round(values$xtab, 4),
+      y = round(values$ytab, 4)
+    ),
+    options = list(pageLength = 10, scrollX = TRUE))
   })
 
   output$regions_info <- renderPrint({
@@ -1130,10 +1477,22 @@ server <- function(input, output, session) {
       cat("No regions")
     } else {
       for (r in values$regions) {
-        cat(r$id, ": [", round(r$xmin, 3), ", ", round(r$xmax, 3), "]  ",
-            "M=", get_sym(r$monot, c("down", "x", "up")),
-            " C=", get_sym(r$conv, c("n", "x", "U")),
-            " D3=", get_sym(r$der3, c("-", "x", "+")), "\n", sep="")
+        cat(
+          r$id,
+          ": [",
+          round(r$xmin, 3),
+          ", ",
+          round(r$xmax, 3),
+          "]  ",
+          "M=",
+          get_sym(r$monot, c("down", "x", "up")),
+          " C=",
+          get_sym(r$conv, c("n", "x", "U")),
+          " D3=",
+          get_sym(r$der3, c("-", "x", "+")),
+          "\n",
+          sep = ""
+        )
       }
     }
   })
@@ -1150,21 +1509,41 @@ server <- function(input, output, session) {
     }
     paste0(
       "library(BsplineQuantReg)\n\n",
-      "x <- c(", paste(round(values$xtab, 4), collapse = ", "), ")\n",
-      "y <- c(", paste(round(values$ytab, 4), collapse = ", "), ")\n",
-      "knots <- c(", paste(round(values$knots, 4), collapse = ", "), ")\n\n",
+      "x <- c(",
+      paste(round(values$xtab, 4), collapse = ", "),
+      ")\n",
+      "y <- c(",
+      paste(round(values$ytab, 4), collapse = ", "),
+      ")\n",
+      "knots <- c(",
+      paste(round(values$knots, 4), collapse = ", "),
+      ")\n\n",
       "fit <- quantile_spline(x, y, knots,\n",
-      "                       tau = ", input$tau, ",\n",
-      "                       degree = ", input$degree, ",\n",
-      "                       monot = c(", paste(constraints$monot, collapse = ", "), "),\n",
-      "                       convcons = c(", paste(constraints$conv, collapse = ", "), "),\n",
-      "                       der3cons = c(", paste(constraints$der3, collapse = ", "), "),\n",
-      "                       solver = '", input$solver, "',\n",
+      "                       tau = ",
+      input$tau,
+      ",\n",
+      "                       degree = ",
+      input$degree,
+      ",\n",
+      "                       monot = c(",
+      paste(constraints$monot, collapse = ", "),
+      "),\n",
+      "                       convcons = c(",
+      paste(constraints$conv, collapse = ", "),
+      "),\n",
+      "                       der3cons = c(",
+      paste(constraints$der3, collapse = ", "),
+      "),\n",
+      "                       solver = '",
+      input$solver,
+      "',\n",
       "                       callable = TRUE)\n\n",
       "x_eval <- seq(min(x), max(x), length.out = 300)\n",
       "y_eval <- fit(x_eval)\n\n",
       "plot(x, y, pch = 16, cex = 0.5, col = 'gray')\n",
-      "lines(x_eval, y_eval, col = '", input$curve_color, "', lwd = 2)"
+      "lines(x_eval, y_eval, col = '",
+      input$curve_color,
+      "', lwd = 2)"
     )
   })
 
@@ -1194,11 +1573,9 @@ server <- function(input, output, session) {
 
   # ============ DEMOS DU PACKAGE ============
 
-  demo_results <- reactiveValues(
-    plot = NULL,
-    output = NULL,
-    height=800
-  )
+  demo_results <- reactiveValues(plot = NULL,
+                                 output = NULL,
+                                 height = 800)
   demo_heights <- list(
     comprehensive = 800,
     monotonicity = 800,
@@ -1214,16 +1591,21 @@ server <- function(input, output, session) {
     showNotification(paste("Running demo:", demo_name), type = "message")
 
     withProgress(message = paste("Running", demo_name, "..."), {
-
       # Récupérer la hauteur depuis la liste
       demo_height <- demo_heights[[demo_name]] %||% 800
-      demo_width <- if (demo_name == "derivative2") 1500 else 800
+      demo_width <- if (demo_name == "derivative2")
+        1500
+      else
+        800
       # Créer un fichier temporaire pour l'image
       temp_file <- tempfile(fileext = ".png")
 
       # Ouvrir un device PNG
 
-      png(temp_file, width = demo_width, height = demo_height, res = 120)
+      png(temp_file,
+          width = demo_width,
+          height = demo_height,
+          res = 120)
 
       # Créer un environnement avec la variable degree
       demo_env <- new.env()
@@ -1235,8 +1617,11 @@ server <- function(input, output, session) {
       output_text <- capture.output({
         tryCatch({
           with(demo_env, {
-            source(system.file("demo", paste0(demo_name, ".R"), package = "BsplineQuantReg"),
-                   local = TRUE, echo = FALSE)
+            source(
+              system.file("demo", paste0(demo_name, ".R"), package = "BsplineQuantReg"),
+              local = TRUE,
+              echo = FALSE
+            )
           })
         }, error = function(e) {
           cat("Error:", e$message, "\n")
@@ -1262,15 +1647,33 @@ server <- function(input, output, session) {
   }
 
   # Exécuter les démos
-  observeEvent(input$demo_comp, { execute_demo("comprehensive") })
-  observeEvent(input$demo_monot, { execute_demo("monotonicity_basic") })
-  observeEvent(input$demo_log, { execute_demo("logistic") })
-  observeEvent(input$demo_temp, { execute_demo("temperature") })
-  observeEvent(input$demo_temp2, { execute_demo("temperature2") })
-  observeEvent(input$demo_conv, { execute_demo("convexity") })
-  observeEvent(input$demo_degrees, { execute_demo("degrees_comparison") })
-  observeEvent(input$demo_der3, { execute_demo("demo_der3") })
-  observeEvent(input$demo_derivative, { execute_demo("derivative2") })
+  observeEvent(input$demo_comp, {
+    execute_demo("comprehensive")
+  })
+  observeEvent(input$demo_monot, {
+    execute_demo("monotonicity_basic")
+  })
+  observeEvent(input$demo_log, {
+    execute_demo("logistic")
+  })
+  observeEvent(input$demo_temp, {
+    execute_demo("temperature")
+  })
+  observeEvent(input$demo_temp2, {
+    execute_demo("temperature2")
+  })
+  observeEvent(input$demo_conv, {
+    execute_demo("convexity")
+  })
+  observeEvent(input$demo_degrees, {
+    execute_demo("degrees_comparison")
+  })
+  observeEvent(input$demo_der3, {
+    execute_demo("demo_der3")
+  })
+  observeEvent(input$demo_derivative, {
+    execute_demo("derivative2")
+  })
 
   # Afficher les résultats
   output$demo_plot <- renderPlot({

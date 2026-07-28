@@ -2,38 +2,38 @@
 #'
 #' Opens an interactive Shiny application for quantile regression
 #' using B-splines with shape constraints.
-#'
 #' @return Launches a Shiny application in the default browser.
 #' @export
+#' @import BsplineQuantReg
 #' @importFrom shiny shinyApp runApp fluidPage sidebarLayout mainPanel
 #' @importFrom shinyjs useShinyjs
 #' @importFrom plotly plotlyOutput renderPlotly plot_ly
 #' @importFrom DT DTOutput renderDT datatable
 #' @importFrom shinythemes shinytheme
 #' @importFrom colourpicker colourInput
+#' @param rstudio Boolean if TRUE launches the shiny browser of rstudio.
 #' @param brow Boolean if TRUE launches the default browser in the system.
-#'             If FALSE, only starts the server, reachable at the given IP address and port.
 #' @examples
 #' if (interactive()) {
 #'   runGui()
 #' }
-runGui <- function(brow=TRUE) {
-  # Vérifier que 'BsplineQuantReg' est installé
-  if (!requireNamespace("BsplineQuantReg", quietly = TRUE)) {
-    stop(
-      "Package 'BsplineQuantReg' is required. ",
-      "Install it with: install.packages('BsplineQuantReg')"
-    )
-  }
+run_gui <- function(brow = TRUE, rstudio = FALSE) {
+  app_dir <- system.file("shiny", package = "BsplineQuantRegGui")
 
-  # Lancer l'application depuis le dossier inst/shiny
-  appDir <- system.file("shiny", package = "BsplineQuantRegGui")
-  if (appDir == "") {
-    stop(
-      "Could not find Shiny application directory. ",
-      "Try reinstalling the package."
+  if (brow && rstudio) {
+    # Ouvrir dans les deux
+    shiny::runApp(
+      app_dir,
+      launch.brow = TRUE
     )
+    # La fenêtre RStudio s'ouvre aussi par défaut
+  } else if (brow) {
+    # Seulement navigateur
+    options(shiny.launch.brow = TRUE)
+    shiny::runApp(app_dir)
+  } else {
+    # Seulement RStudio
+    options(shiny.launch.brow = FALSE)
+    shiny::runApp(app_dir)
   }
-
-  shiny::runApp(appDir, display.mode = "normal", launch.browser=brow)
 }
