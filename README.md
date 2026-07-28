@@ -57,7 +57,7 @@ This package depends on:
 |---------|---------|
 | [BsplineQuantReg] (>= 0.2.2) | Core regression functions |
 | [shiny] | Interactive web framework |
-| [plotly] Interactive graphics |
+| [plotly] | Interactive graphics |
 | [DT] | Interactive tables |
 | [shinythemes] | UI themes |
 | [shinyjs]| Enhanced JavaScript capabilities |
@@ -154,9 +154,4 @@ GPL-3 © Alexandre Abbes
     Abbes, A. (2025). Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications. Zenodo. doi:10.5281/zenodo.17427913
     Abbes, A. (2026). (R). 'BsplineQuantReg'. R Implementation of B-Spline Quantile Regression, including degrees 1 to 4 https://cran.r-project.org/package=BsplineQuantReg
     Abbes, A. (2026). (Python). 'BsplineQuantRegpy'. Python Implementation of B-Spline Quantile Regression, including degrees 1 to 4, Python package version 1.0.4, https://pypi.org/project/BsplineQuantRegpy
-
-
-## Contributing
-
-Contributions are welcome! Please submit issues and pull requests on GitHub: https://github.com/alexandreabbes/BsplineQuantRegGui
 
