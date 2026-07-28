@@ -148,7 +148,7 @@ citation("BsplineQuantRegGui")
 
 ### License
 
-GPL-3 © Alexandre Abbes
+GPL-3 © Alexandre Abbes (2026)
 ## References
 
     Abbes, A. (2025). Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications. Zenodo. doi:10.5281/zenodo.17427913
