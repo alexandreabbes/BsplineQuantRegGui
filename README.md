@@ -28,11 +28,11 @@ This GUI application makes it easy to:
 
 - **Interactive Plotting**: Zoom, pan, and add knots by clicking on the plot
 - **Multiple Data Sources**: Custom function, 'CSV' files, Test data of temperature dataset
-- **Constraint Management**: Add per-region constraints (monotonicity, convexity, 3rd derivative)
+- **Constraint Management**: Add per-region constraints (monotonicity, convexity, third derivative)
 - **Degree management**: Set the degree of the splines used for regression : 1 to 4
 - **Demo Presets**: Run package demos directly from the interface (according degree)
 - **R Code Generation**: Export reproducible 'R' code for your analysis
-- **Customizable Visualization**: Multiple curve plotting with color management
+- **Customizable Visualization**: Multiple curve plotting with colour management
 - **Real-time Feedback**: Progress bars and notifications during computation
 
 ## Installation
@@ -100,7 +100,7 @@ colourpicker	Color selection widget
 
         Drag a rectangle on the plot to define the region
 
-        Adjust monotonicity, convexity, and 3rd derivative constraints
+        Adjust monotonicity, convexity, and third derivative constraints
 
         Click Add region to apply the constraint
 
