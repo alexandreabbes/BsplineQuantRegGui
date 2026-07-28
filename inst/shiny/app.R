@@ -265,7 +265,7 @@ ui <- fluidPage(
                           actionButton("demo_conv", "Convexity", class = "btn-sm btn-info"),
                           actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info"),
                           actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info"),
-
+                          actionButton("demo_der3", "Third derivative", class = "btn-sm btn-info")
                    )
                  ),
                  div(id = "demo_area",
