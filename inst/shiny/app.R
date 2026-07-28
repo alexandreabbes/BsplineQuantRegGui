@@ -131,7 +131,7 @@ ui <- fluidPage(
           actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_conv", "Convexity", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info", style = "flex:1;"),
-          actionButton("demo_der3", "3rd derivative", class = "btn-sm btn-info", style = "flex:1;"),
+          actionButton("demo_der3", "Third derivative", class = "btn-sm btn-info", style = "flex:1;"),
           actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info", style = "flex:1;")
       ),
 
@@ -169,7 +169,7 @@ ui <- fluidPage(
                                          selected = "0", inline = TRUE),
                             conditionalPanel(
                               condition = "input.degree >= 3",
-                              radioButtons("der3", "3rd Derivative:",
+                              radioButtons("der3", "Third Derivative:",
                                            choices = c("x" = "0", "+" = "1", "-" = "-1"),
                                            selected = "0", inline = TRUE)
                             )
@@ -205,7 +205,7 @@ ui <- fluidPage(
                                          selected = "0", inline = TRUE),
                             conditionalPanel(
                               condition = "input.degree >= 3",
-                              radioButtons("region_der3", "3rd Derivative:",
+                              radioButtons("region_der3", "Third Derivative:",
                                            choices = c("x" = "0", "+" = "1", "-" = "-1"),
                                            selected = "0", inline = TRUE)
                             ),
