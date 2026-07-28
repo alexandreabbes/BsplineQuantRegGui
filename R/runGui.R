@@ -1,4 +1,4 @@
-#' Launch the BsplineQuantReg Shiny Interface
+#' Launch the 'BsplineQuantReg' Shiny Interface
 #'
 #' Opens an interactive Shiny application for quantile regression
 #' using B-splines with shape constraints.
@@ -16,7 +16,7 @@
 #'   runGui()
 #' }
 runGui <- function() {
-  # Vérifier que BsplineQuantReg est installé
+  # Vérifier que 'BsplineQuantReg' est installé
   if (!requireNamespace("BsplineQuantReg", quietly = TRUE)) {
     stop(
       "Package 'BsplineQuantReg' is required. ",

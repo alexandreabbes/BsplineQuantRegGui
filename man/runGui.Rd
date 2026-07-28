@@ -2,7 +2,7 @@
 % Please edit documentation in R/runGui.R
 \name{runGui}
 \alias{runGui}
-\title{Launch the BsplineQuantReg Shiny Interface}
+\title{Launch the 'BsplineQuantReg' Shiny Interface}
 \usage{
 runGui()
 }

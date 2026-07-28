@@ -10,14 +10,13 @@ Description: A user-friendly interactive Shiny interface for the 'BsplineQuantRe
     This GUI is similar to the 'Python Tk' version 'BsplineQuantRegPy'.
 License: GPL-3
 URL: https://github.com/alexandreabbes/BsplineQuantRegGui,
-    https://cran.r-project.org/web/packages/BsplineQuantReg/index.html,
 BugReports: https://github.com/alexandreabbes/BsplineQuantRegGui/issues
 Encoding: UTF-8
 Imports:
+    BsplineQuantReg (>= 0.2.1),
     shiny,
     shinythemes,
     shinyjs,
-    BsplineQuantReg (>= 0.2.1),
     DT,
     plotly,
     colourpicker

@@ -4,7 +4,6 @@ markdown
 
 [![CRAN status](https://www.r-pkg.org/badges/version/BsplineQuantRegGui)](https://cran.r-project.org/package=BsplineQuantRegGui)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/BsplineQuantRegGui)](https://cran.r-project.org/package=BsplineQuantRegGui)
-[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue.svg)](https://cran.r-project.org/)
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -12,7 +11,9 @@ markdown
 
 **BsplineQuantRegGui** is an interactive Shiny interface for the [`BsplineQuantReg`](https://cran.r-project.org/package=BsplineQuantReg) package, providing a user-friendly way to perform quantile regression using B-splines with shape constraints.
 
-The package is available on CRAN. The underlying [`BsplineQuantReg`](https://cran.r-project.org/package=BsplineQuantReg) package provides the core regression methods for B-spline quantile regression with Karlin-Studden shape constraints.
+The package is available on 'CRAN'. The underlying [`BsplineQuantReg`](https://cran.r-project.org/package=BsplineQuantReg) package provides the core regression methods for B-spline quantile regression 
+with 'Karlin-Studden' polynomial sign characterisation, including degrees 1 to 4.
+It provides a small set of robust functions in pure R for polynomial calculation, piecewise polynomial and B-spline manipulation, including differentiation, B-spline coefficient calculations.
 
 This GUI application makes it easy to:
 
@@ -21,16 +22,16 @@ This GUI application makes it easy to:
 - Apply shape constraints (monotonicity, convexity, third derivative)
 - Define constraints per region interactively
 - Run quantile regression with various solvers
-- Export reproducible R code
+- Export reproducible 'R' code
 
 ## Features
 
 - **Interactive Plotting**: Zoom, pan, and add knots by clicking on the plot
-- **Multiple Data Sources**: Custom function, CSV files, Test data of temperature dataset
+- **Multiple Data Sources**: Custom function, 'CSV' files, Test data of temperature dataset
 - **Constraint Management**: Add per-region constraints (monotonicity, convexity, 3rd derivative)
 - **Degree management**: Set the degree of the splines used for regression : 1 to 4
 - **Demo Presets**: Run package demos directly from the interface (according degree)
-- **R Code Generation**: Export reproducible R code for your analysis
+- **R Code Generation**: Export reproducible 'R' code for your analysis
 - **Customizable Visualization**: Multiple curve plotting with color management
 - **Real-time Feedback**: Progress bars and notifications during computation
 
@@ -160,7 +161,6 @@ Contributions are welcome! Please submit issues and pull requests on GitHub: htt
 ## BsplineQuantRegGui
 
 [![CRAN status](https://www.r-pkg.org/badges/version/BsplineQuantRegGui)](https://cran.r-project.org/package=BsplineQuantRegGui)
-[![Lifecycle: stable](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
 [![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue.svg)](https://cran.r-project.org/)
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -322,8 +322,10 @@ GPL-3 © Alexandre Abbes
 ## References
 
     Abbes, A. (2025). Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications. Zenodo. doi:10.5281/zenodo.17427913
-    Abbes, A. (2026). (Python). BsplineQuantRegpy. Python Implementation of B-Spline Quantile Regression, Python package version 1.0.4, https://pypi.org/project/BsplineQuantRegpy/
+    Abbes, A. (2026). (R). 'BsplineQuantReg'. R Implementation of B-Spline Quantile Regression, including degrees 1 to 4 https://cran.r-project.org/package=BsplineQuantReg
+    Abbes, A. (2026). (Python). 'BsplineQuantRegpy'. Python Implementation of B-Spline Quantile Regression, including degrees 1 to 4, Python package version 1.0.4, https://pypi.org/project/BsplineQuantRegpy/
+   
 
-Contributing
+## Contributing
 
 Contributions are welcome! Please submit issues and pull requests on GitHub.
