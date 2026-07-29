@@ -1,5 +1,4 @@
 #' Launch the 'BsplineQuantReg' Shiny Interface
-#'
 #' Opens an interactive Shiny application for quantile regression
 #' using B-splines with shape constraints.
 #' @return Launches a Shiny application in the default browser.
@@ -15,25 +14,20 @@
 #' @param brow Boolean if TRUE launches the default browser in the system.
 #' @examples
 #' if (interactive()) {
-#'   runGui()
+#'   run_gui()
 #' }
 run_gui <- function(brow = TRUE, rstudio = FALSE) {
   app_dir <- system.file("shiny", package = "BsplineQuantRegGui")
 
-  if (brow && rstudio) {
-    # Ouvrir dans les deux
-    shiny::runApp(
-      app_dir,
-      launch.brow = TRUE
-    )
-    # La fenêtre RStudio s'ouvre aussi par défaut
-  } else if (brow) {
+  if (!brow && !rstudio) {
+    # aucun
+    shiny::runApp(app_dir,launch.brow = FALSE)
+  }
+    else if (brow) {
     # Seulement navigateur
-    options(shiny.launch.brow = TRUE)
-    shiny::runApp(app_dir)
+    shiny::runApp(app_dir,launch.browser = TRUE)
   } else {
     # Seulement RStudio
-    options(shiny.launch.brow = FALSE)
     shiny::runApp(app_dir)
   }
 }

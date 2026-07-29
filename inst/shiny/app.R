@@ -44,7 +44,7 @@ ui <- fluidPage(
       align = "center",
       style = "color: #2c3e50;"
     ),
-    windowTitle = "BsplineQuantReg"
+    windowTitle = "BsplineQuantRegGui"
   ),
   #themeSelector(),
   div(
@@ -498,7 +498,7 @@ server <- function(input, output, session) {
     knots = NULL,
     manual_knots = list(),
     adding_knot = FALSE,
-    fit = NULL,
+    fitted = NULL,
     x_eval = NULL,
     y_eval = NULL,
     curve_lines = list(),
@@ -568,7 +568,7 @@ server <- function(input, output, session) {
       values$xtab <- x
       values$ytab <- y
       values$data_name <- paste("Test [", xmin, ",", xmax, "]")
-      values$fit <- NULL
+      values$fitted <- NULL
       values$curve_lines <- list()
       values$regions <- list()
       showNotification("Test data generated", type = "message")
@@ -692,7 +692,7 @@ server <- function(input, output, session) {
       values$xtab <- x
       values$ytab <- y
       values$data_name <- "Temperature (1880-1992)"
-      values$fit <- NULL
+      values$fitted <- NULL
       values$curve_lines <- list()
       values$regions <- list()
       year_knots <- c(1880, 1889, 1900, 1910, 1930, 1940, 1965, 1992)
@@ -716,7 +716,7 @@ server <- function(input, output, session) {
       values$xtab <- x
       values$ytab <- y
       values$data_name <- "Custom function"
-      values$fit <- NULL
+      values$fitted <- NULL
       values$curve_lines <- list()
       values$regions <- list()
       showNotification("Data generated", type = "message")
@@ -1002,7 +1002,7 @@ server <- function(input, output, session) {
       values$xtab <- as.vector(x_col)
       values$ytab <- as.vector(y_col)
       values$data_name <- basename(file_path)
-      values$fit <- NULL
+      values$fitted <- NULL
       values$curve_lines <- list()
       values$regions <- list()
 
@@ -1067,7 +1067,7 @@ server <- function(input, output, session) {
       values$xtab <- as.vector(x_col)
       values$ytab <- as.vector(y_col)
       values$data_name <- basename(file_path)
-      values$fit <- NULL
+      values$fitted <- NULL
       values$curve_lines <- list()
       values$regions <- list()
 
@@ -1121,7 +1121,7 @@ server <- function(input, output, session) {
 
       console_text <- capture.output(type = c("message"),
                                      append = FALSE,
-                                     fit <- tryCatch({
+                                     fitted <- tryCatch({
                                        quantile_spline(
                                          as.vector(values$xtab),
                                          as.vector(values$ytab),
@@ -1132,8 +1132,8 @@ server <- function(input, output, session) {
                                          convcons = constraints$conv,
                                          der3cons = constraints$der3,
                                          solver = input$solver,
-                                         callable = TRUE,
-                                         verbose = as.logical(input$verbose)
+                                         verbose = as.logical(input$verbose),
+                                         callable=TRUE #default
                                        )
                                      }, error = function(e) {
                                        cat("Error:", e$message, "\n")
@@ -1160,11 +1160,16 @@ server <- function(input, output, session) {
       }
 
 
+      log_console(paste("BsplineQuantReg version:", packageVersion("BsplineQuantReg")))
+      if (!is.null(fitted)) {
+        #log_console(print(fitted))
 
-      if (!is.null(fit)) {
+        #fitted<-make_spline(fitted, callable=TRUE, verbose=TRUE)
+
+
         x_eval <- seq(min(values$xtab), max(values$xtab), length.out = 300)
-        y_eval <- fit(x_eval)
-        values$fit <- fit
+        y_eval <- spline_eval(fitted,x_eval)
+        values$fitted <- fitted
         values$x_eval <- x_eval
         values$y_eval <- y_eval
         color <- input$curve_color
@@ -1341,9 +1346,9 @@ server <- function(input, output, session) {
   # ============ OUTPUTS ============
 
   # = INFO =
-  output$fit_info <- renderPrint({
+  output$fitted_info <- renderPrint({
     tryCatch({
-      if (is.null(values$fit)) {
+      if (is.null(values$fitted)) {
         cat("No regression")
         return()
       } else
@@ -1356,16 +1361,20 @@ server <- function(input, output, session) {
           status = NA
         )
 
-        if (inherits(input$fit, "callable_spline")) {
-          params <- get_parameters(input$fit)
+        if (inherits(input$fitted, "callable_spline")) {
+          params <- get_parameters(input$fitted)
           info$degree <- params$degree
           info$knots <- params$knot
           info$coeff <- params$coeff
           info$status <- if (!is.null(params$result))
-            params$result$status
-          else
-            NA
-        }
+            params$result$status}
+          else{
+            info$degree <- fitted$degree
+          info$knots <- fitted$knot
+          info$coeff <- fitted$coeff
+          info$status <- if (!is.null(fitted$result))
+          params$fitted$status}
+
         cat("Status: Success\n")
         cat("Degree:", if (!is.na(info$degree))
           info$degree
@@ -1500,7 +1509,7 @@ server <- function(input, output, session) {
   # ============ R CODE ============
 
   output$r_code <- renderText({
-    if (is.null(values$fit)) {
+    if (is.null(values$fitted)) {
       return("# Run a regression first")
     }
     constraints <- build_constraints()
@@ -1518,7 +1527,7 @@ server <- function(input, output, session) {
       "knots <- c(",
       paste(round(values$knots, 4), collapse = ", "),
       ")\n\n",
-      "fit <- quantile_spline(x, y, knots,\n",
+      "fitted <- quantile_spline(x, y, knots,\n",
       "                       tau = ",
       input$tau,
       ",\n",
@@ -1539,7 +1548,7 @@ server <- function(input, output, session) {
       "',\n",
       "                       callable = TRUE)\n\n",
       "x_eval <- seq(min(x), max(x), length.out = 300)\n",
-      "y_eval <- fit(x_eval)\n\n",
+      "y_eval <- fitted(x_eval)\n\n",
       "plot(x, y, pch = 16, cex = 0.5, col = 'gray')\n",
       "lines(x_eval, y_eval, col = '",
       input$curve_color,
@@ -1562,7 +1571,7 @@ server <- function(input, output, session) {
     values$xtab <- NULL
     values$ytab <- NULL
     values$knots <- NULL
-    values$fit <- NULL
+    values$fitted <- NULL
     values$curve_lines <- list()
     values$regions <- list()
     values$region_id <- 0
