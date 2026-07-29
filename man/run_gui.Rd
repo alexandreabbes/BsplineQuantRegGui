@@ -2,7 +2,9 @@
 % Please edit documentation in R/runGui.R
 \name{run_gui}
 \alias{run_gui}
-\title{Launch the 'BsplineQuantReg' Shiny Interface}
+\title{Launch the 'BsplineQuantReg' Shiny Interface
+Opens an interactive Shiny application for quantile regression
+using B-splines with shape constraints.}
 \usage{
 run_gui(brow = TRUE, rstudio = FALSE)
 }
@@ -15,11 +17,12 @@ run_gui(brow = TRUE, rstudio = FALSE)
 Launches a Shiny application in the default browser.
 }
 \description{
+Launch the 'BsplineQuantReg' Shiny Interface
 Opens an interactive Shiny application for quantile regression
 using B-splines with shape constraints.
 }
 \examples{
 if (interactive()) {
-  runGui()
+  run_gui()
 }
 }
