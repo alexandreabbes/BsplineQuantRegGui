@@ -12,11 +12,14 @@
 #' @importFrom colourpicker colourInput
 #' @param rstudio Boolean if TRUE launches the shiny browser of rstudio.
 #' @param brow Boolean if TRUE launches the default browser in the system.
+#' @param host address of the server. Default is '127.0.0.1'
+#' @param port port to reach the app on the server default is 3674
 #' @examples
+#' @export
 #' if (interactive()) {
 #'   run_gui()
 #' }
-run_gui <- function(brow = TRUE, rstudio = FALSE) {
+run_gui <- function(brow = TRUE, rstudio = FALSE, host='127.0.0.1', port=3674) {
   app_dir <- system.file("shiny", package = "BsplineQuantRegGui")
 
   if (!brow && !rstudio) {

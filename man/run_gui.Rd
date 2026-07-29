@@ -6,12 +6,16 @@
 Opens an interactive Shiny application for quantile regression
 using B-splines with shape constraints.}
 \usage{
-run_gui(brow = TRUE, rstudio = FALSE)
+run_gui(brow = TRUE, rstudio = FALSE, host = "127.0.0.1", port = 3674)
 }
 \arguments{
 \item{brow}{Boolean if TRUE launches the default browser in the system.}
 
 \item{rstudio}{Boolean if TRUE launches the shiny browser of rstudio.}
+
+\item{host}{address of the server. Default is '127.0.0.1'}
+
+\item{port}{port to reach the app on the server default is 3674}
 }
 \value{
 Launches a Shiny application in the default browser.
@@ -20,9 +24,4 @@ Launches a Shiny application in the default browser.
 Launch the 'BsplineQuantReg' Shiny Interface
 Opens an interactive Shiny application for quantile regression
 using B-splines with shape constraints.
-}
-\examples{
-if (interactive()) {
-  run_gui()
-}
 }

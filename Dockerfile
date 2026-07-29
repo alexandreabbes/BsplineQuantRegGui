@@ -1,7 +1,6 @@
-# Dockerfile
 FROM rocker/shiny:4.3.0
 
-# System dependencies
+# Système
 RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
@@ -11,35 +10,29 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Rust and Cargo
+# Rust pour CLARABEL
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-RUN R -e "install.packages('CVXR', ref='1.9.1')"
+# Packages R
+RUN R -e "install.packages(c('shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', 'colourpicker', 'pracma', 'png', 'grid', 'remotes', 'devtools'))"
+RUN R -e "install.packages(c('CVXR', 'osqp', 'ECOSolveR', 'scs'))"
 
-# Install remotes
-RUN R -e "install.packages('remotes')"
+# Installer BsplineQuantReg depuis GitHub
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'main')"
 
+# Copier et installer BsplineQuantRegGui
+COPY . /tmp/BsplineQuantRegGui
+RUN R -e "devtools::install('/tmp/BsplineQuantRegGui', upgrade = 'never')"
 
+# Nettoyer
+RUN rm -rf /tmp/BsplineQuantRegGui
 
-# Install BsplineQuantReg depuis GitHub (branche avec la nouvelle syntaxe)
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'with_quartic')"
+# Vérifier l'installation
+RUN R -e "library(BsplineQuantRegGui); print(sessionInfo())"
 
-# Install other packages
-
-RUN R -e "install.packages(c(\
-    'shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', \
-    'colourpicker', 'pracma', 'png', 'grid', \
-    'CLARABEL' \
-))"
-
-# Install BsplineQuantRegGui
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui', ref = 'main')"
-
-# Copy app
-COPY ./inst/shiny /app
-
-WORKDIR /app
+# Port
 EXPOSE 3838
 
-CMD ["R", "-e", "shiny::runApp('/app', host='0.0.0.0', port=3838)"]
+# Lancer l'application
+CMD ["R", "-e", "library(BsplineQuantRegGui); run_gui(host='0.0.0.0', port=3838)"]

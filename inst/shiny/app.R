@@ -7,6 +7,7 @@
 
 library(shiny)
 library(shinyjs)
+# library(ECOSolveR)
 library(BsplineQuantReg)
 library(DT)
 library(plotly)
