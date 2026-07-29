@@ -2,6 +2,7 @@
 
 export(run_gui)
 import(BsplineQuantReg)
+import(ECOSolveR)
 importFrom(DT,DTOutput)
 importFrom(DT,datatable)
 importFrom(DT,renderDT)
