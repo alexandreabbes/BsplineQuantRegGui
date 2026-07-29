@@ -1,6 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
-^\.BsplineQuantRegGui.Rproj
-^\.docs$
-^\.Dockerfile
+^\.BsplineQuantRegGui.Rproj$
+^docs\$
+^Dockerfile$
