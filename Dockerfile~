@@ -1,0 +1,53 @@
+# Dockerfile
+FROM rocker/shiny:4.3.0
+
+# Install system dependencies including Rust
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    libssl-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Rust and Cargo
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Verify Rust installation
+RUN rustc --version && cargo --version
+
+# Install ALL required R packages
+RUN R -e "install.packages(c(\
+    'shiny', \
+    'shinythemes', \
+    'shinyjs', \
+    'DT', \
+    'plotly', \
+    'colourpicker', \
+    'remotes', \
+    'devtools', \
+    'CVXR', \
+    'pracma', \
+    'png', \
+    'grid' \
+))"
+
+# Install CLARABEL from GitHub
+RUN R -e "remotes::install_github('cvxgrp/CLARABEL')"
+
+# Install your packages from CRAN
+RUN R -e "install.packages('BsplineQuantReg', repos='https://cran.r-project.org')"
+RUN R -e "install.packages('BsplineQuantRegGui', repos='https://cran.r-project.org')"
+
+# Copy your Shiny app
+COPY ./inst/shiny /app
+
+# Set working directory
+WORKDIR /app
+
+# Expose the Shiny port
+EXPOSE 3838
+
+# Run the app
+CMD ["R", "-e", "shiny::runApp('/app', host='0.0.0.0', port=3838)"]

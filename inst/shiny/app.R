@@ -7,7 +7,7 @@
 
 library(shiny)
 library(shinyjs)
-# library(ECOSolveR)
+library(ECOSolveR)
 library(BsplineQuantReg)
 library(DT)
 library(plotly)
@@ -161,7 +161,7 @@ ui <- fluidPage(
         6, selectInput(
           "solver",
           "Solver:",
-          choices = c("CLARABEL", "HIGHS", "OSQP", "ECOS", "SCS", "GUROBI")
+          choices = c("ECOS", "SCS","CLARABEL", "HIGHS", "OSQP", "GUROBI")
         )
       ), column(
         6, selectInput("verbose", "Verbose ", choices = c("FALSE", "TRUE"))

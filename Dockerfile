@@ -1,6 +1,7 @@
+# Dockerfile
 FROM rocker/shiny:4.3.0
 
-# Système
+# System dependencies
 RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
@@ -10,29 +11,37 @@ RUN apt-get update && apt-get install -y \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Rust pour CLARABEL
+# Rust and Cargo (pour CLARABEL)
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Packages R
-RUN R -e "install.packages(c('shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', 'colourpicker', 'pracma', 'png', 'grid', 'remotes', 'devtools'))"
-RUN R -e "install.packages(c('CVXR', 'osqp', 'ECOSolveR', 'scs'))"
+# Install R packages de base
+RUN R -e "install.packages(c(\
+    'shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', \
+    'colourpicker', 'pracma', 'png', 'grid', 'remotes', 'devtools' \
+))"
+
+# Installer CVXR depuis GitHub
+RUN R -e "remotes::install_github('cvxgrp/CVXR', ref = 'v1.9.1')"
+
+# Installer les solveurs (dont CLARABEL)
+RUN R -e "install.packages(c('osqp', 'ECOSolveR', 'scs', 'CLARABEL'))"
 
 # Installer BsplineQuantReg depuis GitHub
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'main')"
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = '0.2.2')"
 
-# Copier et installer BsplineQuantRegGui
-COPY . /tmp/BsplineQuantRegGui
-RUN R -e "devtools::install('/tmp/BsplineQuantRegGui', upgrade = 'never')"
-
-# Nettoyer
-RUN rm -rf /tmp/BsplineQuantRegGui
+# Installer BsplineQuantRegGui depuis GitHub
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui')"
 
 # Vérifier l'installation
-RUN R -e "library(BsplineQuantRegGui); print(sessionInfo())"
+RUN R -e "\
+    library(BsplineQuantReg); \
+    print(paste('BsplineQuantReg version:', packageVersion('BsplineQuantReg'))); \
+    library(BsplineQuantRegGui); \
+    print(paste('BsplineQuantRegGui version:', packageVersion('BsplineQuantRegGui')))"
 
 # Port
 EXPOSE 3838
 
-# Lancer l'application
+# Lancer l'application au démarrage (CMD, pas RUN)
 CMD ["R", "-e", "library(BsplineQuantRegGui); run_gui(host='0.0.0.0', port=3838)"]

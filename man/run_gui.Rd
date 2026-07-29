@@ -25,3 +25,8 @@ Launch the 'BsplineQuantReg' Shiny Interface
 Opens an interactive Shiny application for quantile regression
 using B-splines with shape constraints.
 }
+\examples{
+if (interactive()) {
+  run_gui()
+}
+}
