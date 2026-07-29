@@ -21,14 +21,14 @@
 #' @export
 #'
 run_gui <- function(brow = TRUE, rstudio = FALSE, host='127.0.0.1', port=3674) {
-  app_dir <- system.file("shiny", package = "BsplineQuantRegGui")
+  app_dir <- system.file("shiny", package = "BsplineQuantRegGui", host='127.0.0.1', port=3674)
   if (!brow && !rstudio) {
     # aucun
-    shiny::runApp(app_dir,launch.brow = FALSE)
+    shiny::runApp(app_dir,launch.brow = FALSE, host='127.0.0.1', port=3674)
   }
     else if (brow) {
     # Seulement navigateur
-    shiny::runApp(app_dir,launch.browser = TRUE)
+    shiny::runApp(app_dir,launch.browser = TRUE, host='127.0.0.1', port=3674)
   } else {
     # Seulement RStudio
     shiny::runApp(app_dir)

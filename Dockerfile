@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libcurl4-openssl-dev \
     git \
+    xdg-utils \  
     && rm -rf /var/lib/apt/lists/*
 
 # Rust and Cargo (pour CLARABEL)
@@ -28,10 +29,10 @@ RUN R -e "remotes::install_github('cvxgrp/CVXR', ref = 'v1.9.1')"
 RUN R -e "install.packages(c('osqp', 'ECOSolveR', 'scs', 'CLARABEL'))"
 
 # Installer BsplineQuantReg depuis GitHub
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = '0.2.2')"
+RUN R -e "remotes::install_github(repo='alexandreabbes/BsplineQuantReg', ref = '0.2.2')"
 
 # Installer BsplineQuantRegGui depuis GitHub
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui')"
+RUN R -e "remotes::install_github(repo = 'alexandreabbes/BsplineQuantRegGui', upgrade='never')"
 
 # Vérifier l'installation
 RUN R -e "\
