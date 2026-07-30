@@ -1,7 +1,7 @@
 # Dockerfile
-FROM rocker/shiny:4.3.0
+FROM rocker/shiny:4.6.1
 
-# System dependencies
+# Installer les dépendances système
 RUN apt-get update && apt-get install -y \
     curl \
     build-essential \
@@ -9,43 +9,40 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libcurl4-openssl-dev \
     git \
+    libwebpmux3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Rust and Cargo
+# Rust pour CLARABEL
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# R packages
-RUN R -e "install.packages(c(\
-    'shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', \
-    'colourpicker', 'pracma', 'png', 'grid', 'remotes', 'devtools' \
-))"
+# Configurer le repository CRAN
+#RUN R -e "options(repos = c(CRAN = 'https://cloud.r-project.org/'))"
 
-# CVXR et solveurs
-RUN R -e "remotes::install_github('cvxgrp/CVXR', ref = 'v1.9.1')"
-RUN R -e "install.packages(c('osqp', 'ECOSolveR', 'scs', 'CLARABEL'))"
-
-# Installer BsplineQuantReg depuis GitHub
-RUN R -e "install.packages('alexandreabbes/BsplineQuantReg')"
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui', update='never')"
-# Copier le code source de BsplineQuantRegGui
-#COPY . /tmp/BsplineQuantRegGui
-
-# Installer BsplineQuantRegGui localement (inclut inst/shiny/)
-#RUN R -e "remotes::install_local('/tmp/BsplineQuantRegGui')"
+# Installer les packages
+RUN R -e "install.packages(c('remotes', 'shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', 'colourpicker', 'png',  'devtools'))"
 
 
+RUN R -e "install.packages(c('osqp', 'ECOSolveR', 'scs', 'clarabel'),repos = 'https://cloud.r-project.org/')"
 
-# Nettoyer
-RUN rm -rf /tmp/BsplineQuantRegGui
+#RUN R -e "install.packages('CVXR', repos = 'https://cloud.r-project.org/')"
+RUN R -e "remotes::install_version('CVXR', version = '1.9.1', repos = 'https://cloud.r-project.org/', update='never')"
 
-# Vérifier l'installation
-#RUN R -e "print('=== Verification ==='); print(packageVersion('BsplineQuantReg')); print(packageVersion('BsplineQuantRegGui')); print(packageVersion('shiny#')); print('=== Contenu du dossier shiny ==='); print(list.files(system.file('shiny', package='BsplineQuantRegGui'), recursive=TRUE))"
+# Installer BsplineQuantReg depuis CRAN
+#RUN R -e "remotes::install_version('BsplineQuantReg', repos = 'https://cloud.r-project.org/', version='0.2.2', upgrade='never')"
+
+#depuis Github
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'with_quartic', upgrade='never')"
+
+RUN R -e " packageVersion('BsplineQuantReg') "
+
+# Installer BsplineQuantRegGui (pour les dépendances)
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui', ref = 'main')"
+
+# Copier le code source dans le conteneur
+COPY . /app
 
 EXPOSE 3838
 
-
-# Lancer l'application
-#RUN R -e "library(BsplineQuantRegGui)"
-#CMD ["R", "-e", "BsplineQuantRegGui::run_gui(host='0.0.0.0', port=3838)" ]
-CMD ["R", "-e", "library(BsplineQuantReg);  BsplineQuantReg::test_karlin_simple()"]
+# Lancer Shiny directement depuis le dossier copié
+CMD ["R", "-e", "shiny::runApp('/app/inst/shiny', host='0.0.0.0', port=3838)"]

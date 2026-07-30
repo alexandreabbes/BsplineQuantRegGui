@@ -14,10 +14,11 @@ Encoding: UTF-8
 Imports: ECOSolveR,
     BsplineQuantReg (>= 0.2.2),
     shiny,
-    shinythemes,
     shinyjs,
     DT,
     plotly,
+    png,
+    shinythemes,
     colourpicker
 Suggests:   
     cobs
