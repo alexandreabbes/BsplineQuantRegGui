@@ -1,0 +1,37 @@
+# Dockerfile
+FROM rocker/shiny:4.3.0
+
+# Installer les dépendances système
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    libssl-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Rust pour CLARABEL
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Installer remotes
+RUN R -e "install.packages(c('remotes', 'shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', 'colourpicker'))"
+
+# Installer CVXR et les solveurs
+RUN R -e "install.packages(c('CVXR', 'osqp', 'ECOSolveR', 'scs', 'CLARABEL'))"
+
+# Copier le package
+COPY . /tmp/BsplineQuantRegGui
+
+# Installer le package
+RUN R -e "remotes::install_local('/tmp/BsplineQuantRegGui')"
+
+# Nettoyer
+RUN rm -rf /tmp/BsplineQuantRegGui
+
+# Exposer le port
+EXPOSE 3838
+
+# Lancer l'application
+CMD ["R", "-e", "library(BsplineQuantRegGui); run_gui(host='0.0.0.0', port=3838)"]

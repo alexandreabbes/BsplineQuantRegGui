@@ -13,13 +13,13 @@ library(DT)
 library(plotly)
 library(colourpicker)
 library(shinythemes)
+library(png)
 
 # UI ----------------------------------------------------------------------
 
 ui <- fluidPage(
   theme = shinytheme("flatly"),
   useShinyjs(),
-
   tags$style(
     HTML(
       "

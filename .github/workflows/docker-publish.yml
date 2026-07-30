@@ -1,0 +1,10 @@
+BsplineQuantRegGui/
+├── .github/
+│   └── workflows/
+│       └── docker-publish.yml   # ← Ce fichier
+├── inst/
+│   └── docker/
+│       └── Dockerfile
+├── R/
+├── DESCRIPTION
+└── ...

@@ -1,0 +1,47 @@
+FROM rocker/shiny:4.3.0
+
+# Système
+RUN apt-get update && apt-get install -y \
+    curl \
+    build-essential \
+    libssl-dev \
+    libxml2-dev \
+    libcurl4-openssl-dev \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Rust pour CLARABEL
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+
+# Packages R
+RUN R -e "install.packages(c('shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', 'colourpicker', 'pracma', 'png', 'grid', 'remotes', 'devtools'))"
+RUN R -e "install.packages(c('CVXR', 'osqp', 'ECOSolveR', 'scs'))"
+
+# ============================================
+# 1. Installer BsplineQuantReg (>= 0.2.2)
+# ============================================
+# Depuis GitHub (branche main = version 0.2.2+)
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'main')"
+
+# OU depuis CRAN si la version est disponible
+# RUN R -e "install.packages('BsplineQuantReg', repos='https://cloud.r-project.org/')"
+
+# Vérifier la version
+RUN R -e "print(packageVersion('BsplineQuantReg'))"
+
+# ============================================
+# 2. Installer BsplineQuantRegGui
+# ============================================
+COPY . /tmp/BsplineQuantRegGui
+RUN R -e "devtools::install('/tmp/BsplineQuantRegGui', upgrade = 'never')"
+
+# Nettoyer
+RUN rm -rf /tmp/BsplineQuantRegGui
+
+# Vérifier l'installation
+RUN R -e "library(BsplineQuantRegGui); print(sessionInfo())"
+
+EXPOSE 3838
+
+CMD ["R", "-e", "library(BsplineQuantRegGui); run_gui(host='0.0.0.0', port=3838)"]
