@@ -5,5 +5,5 @@
 #' @importFrom DT DTOutput renderDT datatable
 #' @importFrom shinythemes shinytheme
 #' @importFrom colourpicker colourInput
-#' @import ECOSolveR
+#' @import ECOSolveR, png
 NULL

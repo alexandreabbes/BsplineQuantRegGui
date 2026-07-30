@@ -4,3 +4,4 @@
 ^\.BsplineQuantRegGui.Rproj$
 ^docs/
 ^Dockerfile$
+^nohup.out$
