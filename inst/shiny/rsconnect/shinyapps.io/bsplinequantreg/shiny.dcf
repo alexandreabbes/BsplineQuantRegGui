@@ -1,0 +1,12 @@
+name: shiny
+title: shiny
+username: bsplinequantreg
+account: bsplinequantreg
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 17632591
+bundleId: 12342041
+url: https://bsplinequantreg.shinyapps.io/shiny/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE

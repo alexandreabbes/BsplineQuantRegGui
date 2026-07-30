@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - master
-  workflow_dispatch:  # Permet de lancer manuellement
+  workflow_dispatch:
 
 jobs:
   build-and-push:
@@ -14,7 +14,7 @@ jobs:
     
     permissions:
       contents: read
-      packages: write  # Nécessaire pour GHCR
+      packages: write
 
     steps:
       - name: Checkout code
@@ -30,6 +30,10 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Convert repository name to lowercase
+        run: |
+          echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -37,8 +41,5 @@ jobs:
           file: inst/docker/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-
-      - name: Image digest
-        run: echo "Image pushed to ghcr.io/${{ github.repository }}:latest"
+            ghcr.io/${{ env.REPO_LC }}:latest
+            ghcr.io/${{ env.REPO_LC }}:${{ github.sha }}
