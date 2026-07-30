@@ -19,18 +19,21 @@
 #'   run_gui()
 #' }
 #' @export
-#'
-run_gui <- function(brow = TRUE, rstudio = FALSE, host='127.0.0.1', port=3674) {
-  app_dir <- system.file("shiny", package = "BsplineQuantRegGui", host='127.0.0.1', port=3674)
-  if (!brow && !rstudio) {
-    # aucun
-    shiny::runApp(app_dir,launch.brow = FALSE, host='127.0.0.1', port=3674)
-  }
-    else if (brow) {
-    # Seulement navigateur
-    shiny::runApp(app_dir,launch.browser = TRUE, host='127.0.0.1', port=3674)
-  } else {
-    # Seulement RStudio
-    shiny::runApp(app_dir)
-  }
+
+run_gui <- function(brow = TRUE, rstudio = FALSE, host = '127.0.0.1', port = 3674) {
+
+app_dir <- system.file("shiny", package = "BsplineQuantRegGui")
+
+# Vérifier que le dossier existe
+if (app_dir == "" || !dir.exists(app_dir)) {
+  stop("Shiny app directory not found. Reinstall the package.")
+}
+
+if (!brow && !rstudio) {
+  shiny::runApp(app_dir, launch.browser = FALSE, host = host, port = port)
+} else if (brow) {
+  shiny::runApp(app_dir, launch.browser = TRUE, host = host, port = port)
+} else {
+  shiny::runApp(app_dir)
+}
 }
