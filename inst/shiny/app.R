@@ -370,7 +370,7 @@ ui <- fluidPage(
 
           # Information (unique)
           fluidRow(
-            column(6, h5("Information"), verbatimTextOutput("fit_info")),
+#            column(6, h5("Information"), verbatimTextOutput("fitted_info")),
             column(
               6,
               h5("List of knots"),
@@ -1163,10 +1163,6 @@ server <- function(input, output, session) {
 
       log_console(paste("BsplineQuantReg version:", packageVersion("BsplineQuantReg")))
       if (!is.null(fitted)) {
-        #log_console(print(fitted))
-
-        #fitted<-make_spline(fitted, callable=TRUE, verbose=TRUE)
-
 
         x_eval <- seq(min(values$xtab), max(values$xtab), length.out = 300)
         y_eval <- spline_eval(fitted,x_eval)
@@ -1346,56 +1342,66 @@ server <- function(input, output, session) {
   })
   # ============ OUTPUTS ============
 
-  # = INFO =
+#INFO===================================
   output$fitted_info <- renderPrint({
     tryCatch({
       if (is.null(values$fitted)) {
         cat("No regression")
         return()
-      } else
-      {
-        # Extraire les informations
-        info <- list(
-          degree = NA,
-          knots = NA,
-          coeff = NA,
-          status = NA
-        )
-
-        if (inherits(input$fitted, "callable_spline")) {
-          params <- get_parameters(input$fitted)
-          info$degree <- params$degree
-          info$knots <- params$knot
-          info$coeff <- params$coeff
-          info$status <- if (!is.null(params$result))
-            params$result$status}
-          else{
-            info$degree <- fitted$degree
-          info$knots <- fitted$knot
-          info$coeff <- fitted$coeff
-          info$status <- if (!is.null(fitted$result))
-          params$fitted$status}
-
-        cat("Status: Success\n")
-        cat("Degree:", if (!is.na(info$degree))
-          info$degree
-          else
-            "unknown", "\n")
-        cat("Tau:", input$tau, "\n")
-        cat("Knots:", length(info$knots %||% values$knots), "\n")
-        cat("Coefficients:",
-            length(info$coeff %||% numeric(0)),
-            "\n")
-        if (!is.na(info$status)) {
-          cat("Solver status:", info$status, "\n")
-        }
       }
-    }
-    , error = function(e) {
-      cat("Error displaying fit info:", e$message)
-    })
 
+      # Extraire les informations
+      info <- list(
+        degree = NA,
+        knots = NA,
+        coeff = NA,
+        status = NA
+      )
+
+      # Vérifier le type de values$fitted
+      spline <- values$fitted
+      log_console(paste("Class of spline:", class(spline)[1]))
+
+      if (inherits(spline, "callable_spline")) {
+        log_console("C'est une callable_spline - utiliser get_parameters")
+        params <- get_parameters(spline)
+        info$degree <- params$degree
+        info$knots <- params$knot
+        info$coeff <- params$coeff
+        info$status <- if (!is.null(params$result)) params$result$status else NA
+      } else if (is.list(spline)) {
+        log_console("C'est une liste")
+        info$degree <- spline$degree %||% attr(spline, "degree")
+        info$knots <- spline$knot %||% spline$knots
+        info$coeff <- spline$coeff %||% spline$coefficients %||% attr(spline, "coefficients")
+        info$status <- if (!is.null(spline$result)) spline$result$status else NA
+      } else {
+        log_console("Autre type")
+        info$degree <- attr(spline, "degree")
+        info$knots <- values$knots
+        info$coeff <- attr(spline, "coefficients") %||% spline$c
+      }
+
+      cat("Status: Success\n")
+      cat("Degree:", if (!is.na(info$degree)) info$degree else "unknown", "\n")
+      cat("Tau:", input$tau, "\n")          # ← input$tau, pas values$tau
+      cat("Solver:", input$solver, "\n")    # ← input$solver, pas values$solver
+      cat("Knots:", length(info$knots %||% values$knots %||% numeric(0)), "\n")
+      cat("Coefficients:", length(info$coeff %||% numeric(0)), "\n")
+      if (!is.na(info$status)) {
+        cat("Solver status:", info$status, "\n")
+      }
+
+    }, error = function(e) {
+      cat("Error displaying fit info:", e$message, "\n")
+      cat("Type of values$fitted:", class(values$fitted)[1], "\n")
+      if (is.list(values$fitted)) {
+        cat("Names:", paste(names(values$fitted), collapse = ", "), "\n")
+      }
+    })
   })
+
+
 
 
   # = Curve cournt =
