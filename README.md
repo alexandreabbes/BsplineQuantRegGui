@@ -13,12 +13,12 @@ blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ##Overview
 
-** BsplineQuantRegGui ** is an interactive Shiny interface for the [`BsplineQuantReg`](https: /
-/ cran.r - project.org / package = BsplineQuantReg) package, providing a user -
+** BsplineQuantRegGui ** is an interactive Shiny interface for the [`BsplineQuantReg`](https:/
+/cran.r-project.org/package=BsplineQuantReg) package, providing a user -
 friendly way to perform quantile regression using B - splines with shape constraints.
 
-The package is available on 'CRAN'. The underlying [`BsplineQuantReg`](https: /
-/ cran.r - project.org / package = BsplineQuantReg) package provides the core regression methods for B -
+The package is available on 'CRAN'. The underlying [`BsplineQuantReg`](https:/
+/cran.r-project.org/package=BsplineQuantReg) package provides the core regression methods for B -
 spline quantile regression
 with 'Karlin-Studden' polynomial sign characterisation, including degrees 1 to 4.
 It provides a small set of robust functions in pure R for polynomial calculation, piecewise polynomial and B -
