@@ -9,12 +9,12 @@ bibentry(
   title = "BsplineQuantReg: Constrained Quantile Regression with B-Splines (Degrees 1 to 4)",
   author = c(person(given = "Alexandre", family = "Abbes")),
   year = "2026",
-  note = paste("R package version", get_pkg_version("BsplineQuantReg")),
+  note = paste("R package version 0.2.2"),
   url = "https://cran.r-project.org/package=BsplineQuantReg",
   textVersion = paste(
     "Abbes, A. (2026).",
-    "BsplineQuantReg: Constrained Quantile Regression with B-Splines.",
-    "(R package version", 0.2.2 "),
+    "BsplineQuantReg: Constraine Quantile Regression with B-Splines.",
+    "(R package version >= 0.2.2 )",
     "https://cran.r-project.org/package=BsplineQuantReg"
   )
 )
@@ -41,12 +41,12 @@ bibentry(
   title = "BsplineQuantRegGui: Interactive GUI for B-Spline Quantile Regression",
   author = c(person(given = "Alexandre", family = "Abbes")),
   year = "2026",
-  note = paste("R package version", get_pkg_version("BsplineQuantRegGui")),
+  note = paste("R package version 0.1.0"),
   url = "https://cran.r-project.org/package=BsplineQuantRegGui",
   textVersion = paste(
     "Abbes, A. (2026).",
     "BsplineQuantRegGui: Interactive GUI for B-Spline Quantile Regression.",
-    "(R package version", get_pkg_version("BsplineQuantRegGui"), ").",
+    "(R package version", "0.1.0"),
     "https://cran.r-project.org/package=BsplineQuantRegGui"
   )
 )
