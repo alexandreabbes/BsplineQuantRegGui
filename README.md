@@ -1,15 +1,9 @@
-
-
 # BsplineQuantRegGui
 
-[![CRANstatus](https://www.r-pkg.org/badges/version/BsplineQuantRegGui)](https:/
-/cran.r-project.org/package=BsplineQuantRegGui)
-[![CRANdownloads](https://cranlogs.r-pkg.org/badges/BsplineQuantRegGui)](https:/
-/cran.r-project.org/package=BsplineQuantRegGui)
-[![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue.svg)](https:/
-/cran.r-project.org/)
-[![License:GPL-3](https://img.shields.io/badge/License-GPL--3-
-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![CRANstatus](https://www.r-pkg.org/badges/version/BsplineQuantRegGui)](https://cran.r-project.org/package=BsplineQuantRegGui)
+[![CRANdownloads](https://cranlogs.r-pkg.org/badges/BsplineQuantRegGui)](https://cran.r-project.org/package=BsplineQuantRegGui)
+[![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue.svg)](https://cran.r-project.org/)
+[![License:GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ##Overview
 
