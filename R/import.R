@@ -7,4 +7,5 @@
 #' @importFrom colourpicker colourInput
 #' @import ECOSolveR
 #' @importFrom grDevices png
+#' @importFrom png readPNG
 NULL

@@ -19,9 +19,9 @@ Imports: ECOSolveR,
     plotly,
     png,
     shinythemes,
-    colourpicker
-Suggests:   
-    cobs
+    colourpicker,
+    png
+Suggests: cobs
 LazyData: true
 Config/testthat/edition: 3
 NeedsCompilation: no

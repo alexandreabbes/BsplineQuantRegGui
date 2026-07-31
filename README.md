@@ -2,16 +2,16 @@
 
 # BsplineQuantRegGui
 
-[![CRAN status](https: /  / www.r - pkg.org / badges / version / BsplineQuantRegGui)](https: /
-/ cran.r - project.org / package = BsplineQuantRegGui)
-[![CRAN downloads](https: /  / cranlogs.r - pkg.org / badges / BsplineQuantRegGui)](https: /
-/ cran.r - project.org / package = BsplineQuantRegGui)
-[![R](https: /  / img.shields.io / badge / R- %3E% 3D%204.0 - blue.svg)](https: /
-/ cran.r - project.org / )
-[![License:GPL - 3](https: /  / img.shields.io / badge / License - GPL--3 -
-blue.svg)](https: /  / www.gnu.org / licenses / gpl - 3.0)
+[![CRANstatus](https://www.r-pkg.org/badges/version/BsplineQuantRegGui)](https:/
+/cran.r-project.org/package=BsplineQuantRegGui)
+[![CRANdownloads](https://cranlogs.r-pkg.org/badges/BsplineQuantRegGui)](https:/
+/cran.r-project.org/package=BsplineQuantRegGui)
+[![R](https://img.shields.io/badge/R-%3E%3D%204.0-blue.svg)](https:/
+/cran.r-project.org/)
+[![License:GPL-3](https://img.shields.io/badge/License-GPL--3-
+blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-## Overview
+##Overview
 
 ** BsplineQuantRegGui ** is an interactive Shiny interface for the [`BsplineQuantReg`](https: /
 / cran.r - project.org / package = BsplineQuantReg) package, providing a user -
@@ -53,6 +53,17 @@ library(BsplineQuantRegGui)
 ### Launch the application
 runGui()
 ```
+
+
+###Docker Deployment
+A Docker image is available for easy deployment:
+bash
+```sh
+docker pull ghcr.io/alexandreabbes/bsplinequantreggui:latest
+docker run -p 3838:3838 ghcr.io/alexandreabbes/bsplinequantreggui:latest
+```
+Then open http://localhost:3838 in your browser.
+
 
 ###The GUI will open in your default web browser.
 ##Dependencies
@@ -139,39 +150,28 @@ citation("BsplineQuantRegGui")
 
 #If you use this package in your research, please cite:
 ```bibtex@Article{
-Abbes2025, author  = {
-Alexandre Abbes
-}, title   = {
-Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications
-}, year    = {
-2025
-}, doi     = {
-10.5281 / zenodo.17427913
+Abbes2025, author= {
+Alexandre Abbes},
+title= {Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications}, 
+year= {2025},
+doi={10.5281/zenodo.17427913}
 }
-}@Manual{
-Abbes2026R, author  = {
-Alexandre Abbes
-}, title   = {
-BsplineQuantReg:Quantile Regression with Bspline of degrees 1 to 4, under multiple shape constraints of order 1 to 3
-}, year    = {
-2026
-}, note    = {
-R package version 0.2.0
-}, url     = {
-https: /  / cran.r - project.org / package = BsplineQuantReg
-}
+@Manual{
+Abbes2026R, 
+author= {Alexandre Abbes}, 
+title   = {BsplineQuantReg:Quantile Regression with Bspline of degrees 1 to 4, under multiple shape constraints of order 1 to 3
+},
+year={2026},
+note= {R package version 0.2.0}, url= {https://cran.r-project.org/package=BsplineQuantReg}
 }
 ```
 
 ### License
+GPL-3 (c) Alexandre Abbes (2026)
 
-GPL - 3 © Alexandre Abbes (2026)
 ## References
 
 Abbes, A. (2025). Quantile Regression with Cubic Polynomial Splines under Shape Constraints with Applications. Zenodo. doi:10.5281 /
 zenodo.17427913
-Abbes, A. (2026). (R). 'BsplineQuantReg'. R Implementation of B - Spline Quantile Regression, including degrees 1 to 4 https: /
-/ cran.r - project.org / package = BsplineQuantReg
-Abbes, A. (2026). (Python). 'BsplineQuantRegpy'. Python Implementation of B -
-Spline Quantile Regression, including degrees 1 to 4, Python package version 1.0.4, https: /
-/ pypi.org / project / BsplineQuantRegpy
+Abbes, A. (2026). (R). 'BsplineQuantReg'. R Implementation of B - Spline Quantile Regression, including degrees 1 to 4 https://cran.r-project.org/package=BsplineQuantReg
+Abbes, A. (2026). (Python). 'BsplineQuantRegpy'. Python Implementation of B - Spline Quantile Regression, including degrees 1 to 4, Python package version 1.0.4, https://pypi.org/project/BsplineQuantRegpy
