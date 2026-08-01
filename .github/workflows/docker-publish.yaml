@@ -41,13 +41,6 @@ jobs:
           file: inst/docker/Dockerfile
           push: true
           tags: |
-      	   ghcr.io/alexandreabbes/bsplinequantreggui:latest
-       	   ghcr.io/alexandreabbes/bsplinequantreggui:${{ github.sha }}
-	tags: |
-  	ghcr.io/${{ github.repository }}:latest
-  	ghcr.io/${{ github.repository }}:${{ github.sha }}
-  	ghcr.io/${{ github.repository }}:v1.0.0
-	
-	
-
-	   
+            ghcr.io/${{ env.REPO_LC }}:latest
+            ghcr.io/${{ env.REPO_LC }}:${{ github.sha }}
+            ghcr.io/${{ env.REPO_LC }}:0.1.0
