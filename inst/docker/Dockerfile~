@@ -9,40 +9,43 @@ RUN apt-get update && apt-get install -y \
     libxml2-dev \
     libcurl4-openssl-dev \
     git \
-    xdg-utils \  
     && rm -rf /var/lib/apt/lists/*
 
-# Rust and Cargo (pour CLARABEL)
+# Rust and Cargo
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
 
-# Install R packages de base
+# R packages
 RUN R -e "install.packages(c(\
     'shiny', 'shinythemes', 'shinyjs', 'DT', 'plotly', \
     'colourpicker', 'pracma', 'png', 'grid', 'remotes', 'devtools' \
 ))"
 
-# Installer CVXR depuis GitHub
+# CVXR et solveurs
 RUN R -e "remotes::install_github('cvxgrp/CVXR', ref = 'v1.9.1')"
-
-# Installer les solveurs (dont CLARABEL)
 RUN R -e "install.packages(c('osqp', 'ECOSolveR', 'scs', 'CLARABEL'))"
 
 # Installer BsplineQuantReg depuis GitHub
-RUN R -e "remotes::install_github(repo='alexandreabbes/BsplineQuantReg', ref = '0.2.2')"
+RUN R -e "install.packages('alexandreabbes/BsplineQuantReg')"
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui', update='never')"
+# Copier le code source de BsplineQuantRegGui
+#COPY . /tmp/BsplineQuantRegGui
 
-# Installer BsplineQuantRegGui depuis GitHub
-RUN R -e "remotes::install_github(repo = 'alexandreabbes/BsplineQuantRegGui', upgrade='never')"
+# Installer BsplineQuantRegGui localement (inclut inst/shiny/)
+#RUN R -e "remotes::install_local('/tmp/BsplineQuantRegGui')"
+
+
+
+# Nettoyer
+RUN rm -rf /tmp/BsplineQuantRegGui
 
 # Vérifier l'installation
-RUN R -e "\
-    library(BsplineQuantReg); \
-    print(paste('BsplineQuantReg version:', packageVersion('BsplineQuantReg'))); \
-    library(BsplineQuantRegGui); \
-    print(paste('BsplineQuantRegGui version:', packageVersion('BsplineQuantRegGui')))"
+#RUN R -e "print('=== Verification ==='); print(packageVersion('BsplineQuantReg')); print(packageVersion('BsplineQuantRegGui')); print(packageVersion('shiny#')); print('=== Contenu du dossier shiny ==='); print(list.files(system.file('shiny', package='BsplineQuantRegGui'), recursive=TRUE))"
 
-# Port
 EXPOSE 3838
 
-# Lancer l'application au démarrage (CMD, pas RUN)
-CMD ["R", "-e", "library(BsplineQuantRegGui); run_gui(host='0.0.0.0', port=3838)"]
+
+# Lancer l'application
+#RUN R -e "library(BsplineQuantRegGui)"
+#CMD ["R", "-e", "BsplineQuantRegGui::run_gui(host='0.0.0.0', port=3838)" ]
+CMD ["R", "-e", "library(BsplineQuantReg);  BsplineQuantReg::test_karlin_simple()"]

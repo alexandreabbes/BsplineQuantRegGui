@@ -165,15 +165,13 @@ ui <- fluidPage(
         value = 0.5
       )),
       br(),
-      fluidRow(column(
-        6, selectInput(
-          "solver",
-          "Solver:",
-          choices = c("ECOS", "SCS","CLARABEL", "HIGHS", "OSQP", "GUROBI")
-        )
-      ), column(
-        6, selectInput("verbose", "Verbose ", choices = c("FALSE", "TRUE"))
-      )),
+      fluidRow(h6(column(6, selectInput("solver","Solver:",
+          choices = c("ECOS", "SCS","CLARABEL", "HIGHS", "OSQP", "GUROBI") ) ),
+        column(6,selectInput("type_reg","Type of Regr.",
+                      choices=c('quantile','mean_square') ) ))),
+      h6(column(
+        6, selectInput("verbose", "Verbose ", choices = c(FALSE, TRUE)))
+      ),
 
       hr(),
 
@@ -379,12 +377,12 @@ ui <- fluidPage(
 
           # Information (unique)
           fluidRow(
-            column(6, h5("Information"), verbatimTextOutput("fitted_info")),
-            column(
-              6,
-              h5("List of knots"),
-              verbatimTextOutput("knots_compact", placeholder = TRUE)
-            )
+            column(6, h5("Information"), verbatimTextOutput("fit_info")),
+            column(6, h5("List of knots"),
+              verbatimTextOutput("knots_compact", placeholder = TRUE),
+              h5("Coefficients on the Bspline Basis"),
+              verbatimTextOutput("coeff_list", placeholder = TRUE))
+
           ),
 
           hr(),
@@ -504,7 +502,7 @@ server <- function(input, output, session) {
   values <- reactiveValues(
     xtab = NULL,
     ytab = NULL,
-    knots = NULL,
+    knot = NULL,
     manual_knots = list(),
     adding_knot = FALSE,
     fitted = NULL,
@@ -705,8 +703,8 @@ server <- function(input, output, session) {
       values$curve_lines <- list()
       values$regions <- list()
       year_knots <- c(1880, 1889, 1900, 1910, 1930, 1940, 1965, 1992)
-      knots <- (year_knots - 1880) / (1992 - 1880)
-      values$knots <- knots
+      knot <- (year_knots - 1880) / (1992 - 1880)
+      values$knot <- knot
       showNotification("Temperature data loaded", type = "message")
     })
   })
@@ -744,18 +742,18 @@ server <- function(input, output, session) {
         kn <- max((input$knots_count), 2) - 1
 
         #if (is.na(knots_count)){knots_count=2}
-        values$knots <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
+        values$knot <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
       }
       else{
         kn = 1
-        values$knots = c(0, 1)
+        values$knot = c(0, 1)
       }
     }
   })
 
   output$knots_compact <- renderPrint({
-    if (!is.null(values$knots) && length(values$knots) > 0) {
-      k <- round(values$knots, 3)
+    if (!is.null(values$knot) && length(values$knot) > 0) {
+      k <- round(values$knot, 3)
       if (length(k) <= 8) {
         cat(paste(k, collapse = ", "))
       } else {
@@ -765,7 +763,18 @@ server <- function(input, output, session) {
       cat("(none)")
     }
   })
-
+  output$knots_compact <- renderPrint({
+    if (!is.null(values$knot) && length(values$knot) > 0) {
+      k <- round(values$knot, 3)
+      if (length(k) <= 8) {
+        cat(paste(k, collapse = ", "))
+      } else {
+        cat(paste(c(head(k, 4), "...", tail(k, 4)), collapse = ", "))
+      }
+    } else {
+      cat("(none)")
+    }
+  })
   observeEvent(input$add_knot_mode, {
     values$adding_knot <- !values$adding_knot
     if (values$adding_knot) {
@@ -782,9 +791,9 @@ server <- function(input, output, session) {
       if (!is.null(click) && !is.null(values$xtab)) {
         x <- click$x
         if (x > min(values$xtab) && x < max(values$xtab)) {
-          if (!any(abs(values$knots - x) < 1e-6)) {
+          if (!any(abs(values$knot - x) < 1e-6)) {
             values$manual_knots <- c(values$manual_knots, x)
-            values$knots <- sort(c(values$knots, x))
+            values$knot <- sort(c(values$knot, x))
             showNotification(paste("Knot added at x =", round(x, 3)), type = "message")
           } else {
             showNotification("This knot already exists", type = "warning")
@@ -800,9 +809,9 @@ server <- function(input, output, session) {
     values$manual_knots <- list()
     if (!is.null(values$xtab)) {
       kn <- max(input$knots_count, 2) - 1
-      values$knots <- quantile(values$xtab, probs = (0:(kn)) / (kn))
+      values$knot <- quantile(values$xtab, probs = (0:(kn)) / (kn))
     }
-    showNotification("Knots reset", type = "message")
+    showNotification("knot reset", type = "message")
   })
 
   # ============ SELECTION MANAGEMENT ============
@@ -845,7 +854,7 @@ server <- function(input, output, session) {
   # ============ REGIONS ============
 
   observeEvent(input$add_region, {
-    req(values$xtab, values$knots)
+    req(values$xtab, values$knot)
     xmin <- input$region_xmin
     xmax <- input$region_xmax
     if (xmin >= xmax) {
@@ -909,7 +918,7 @@ server <- function(input, output, session) {
 
   build_constraints <- function() {
     degree <- input$degree
-    kn <- length(values$knots) - 1
+    kn <- length(values$knot) - 1
 
     if (kn < 1) {
       showNotification("Not enough knots!", type = "warning")
@@ -938,8 +947,8 @@ server <- function(input, output, session) {
       der3 <- rep(0, kn + 1)
       for (region in values$regions) {
         for (i in 1:kn) {
-          x1 <- values$knots[i]
-          x2 <- values$knots[i + 1]
+          x1 <- values$knot[i]
+          x2 <- values$knot[i + 1]
           if (x2 > region$xmin && x1 < region$xmax) {
             if (region$monot != 0)
               monot[i] <- region$monot
@@ -1020,7 +1029,7 @@ server <- function(input, output, session) {
 
       values$manual_knots <- list()
       kn <- max(input$knots_count, 2) - 1
-      values$knots <- quantile(values$xtab, probs = (0:(kn)) / (kn))
+      values$knot <- quantile(values$xtab, probs = (0:(kn)) / (kn))
 
       showNotification(paste(
         "File loaded:",
@@ -1051,7 +1060,6 @@ server <- function(input, output, session) {
     file_path <- file.choose()
     if (is.na(file_path))
       return()
-
     tryCatch({
       df <- readxl::read_excel(file_path)
       df <- as.data.frame(df)
@@ -1084,8 +1092,8 @@ server <- function(input, output, session) {
       updateNumericInput(session, "data_xmax", value = max(values$xtab))
 
       values$manual_knots <- list()
-      kn <- max(input$knots_count, 2) - 1
-      values$knots <- quantile(values$xtab, probs = (0:(kn)) / (kn))
+      kn <- max(input$knot_count, 2) - 1
+      values$knot <- quantile(values$xtab, probs = (0:(kn)) / (kn))
 
       showNotification(paste(
         "File loaded:",
@@ -1098,22 +1106,19 @@ server <- function(input, output, session) {
 
     }, error = function(e) {
       showNotification(paste("Read error:", e$message), type = "error")
-    })
-  })
+    } )} )
+
 
   # ============ REGRESSION ============
 
   observeEvent(input$run, {
-    req(values$xtab, values$ytab, values$knots)
+    req(values$xtab, values$ytab, values$knot)
 
-    if (length(values$knots) < 2) {
+    if (length(values$knot) < 2) {
       showNotification("Need at least 2 knots!", type = "error")
       return()
     }
-    if (length(values$knots) - 1 < 1) {
-      showNotification("Need at least 1 interval!", type = "error")
-      return()
-    }
+
     if (length(values$xtab) != length(values$ytab)) {
       showNotification("x and y have different lengths!", type = "error")
       return()
@@ -1121,36 +1126,71 @@ server <- function(input, output, session) {
 
     withProgress(message = "Regression...", {
       constraints <- build_constraints()
-      if (is.null(constraints))
-        return()
+      if (is.null(constraints)) return()
 
       log_console("=== Starting Regression ===")
       log_console(paste("Degree:", input$degree))
       log_console(paste("Solver:", input$solver))
+      log_console(paste("Verbose:", input$verbose))
 
-      console_text <- capture.output(type = c("message"),
-                                     append = FALSE,
-                                     fitted <- tryCatch({
-                                       quantile_spline(
-                                         as.vector(values$xtab),
-                                         as.vector(values$ytab),
-                                         as.vector(values$knots),
-                                         tau = input$tau,
-                                         degree = input$degree,
-                                         monot = constraints$monot,
-                                         convcons = constraints$conv,
-                                         der3cons = constraints$der3,
-                                         solver = input$solver,
-                                         verbose = as.logical(input$verbose),
-                                         callable=TRUE #default
-                                       )
-                                     }, error = function(e) {
-                                       cat("Error:", e$message, "\n")
-                                       NULL
-                                     }))
+      # Vérifier la version de BsplineQuantReg
+      version <- packageVersion("BsplineQuantReg")
 
-      #log_console(console_text)
+      # Paramètres communs
+      args <- list(
+        as.vector(values$xtab),
+        as.vector(values$ytab),
+        knot=as.vector(values$knot),
+        tau = input$tau,
+        degree = as.numeric(input$degree),
+        monot = constraints$monot,
+        convcons = constraints$conv,
+        der3cons = constraints$der3,
+        solver = as.logical(input$solver),
+        verbose = input$verbose,
+        callable = TRUE
+      )
 
+      # Ajouter le paramètre type_reg si la version est >= 0.2.3
+      if (version >= "0.2.3") {
+        args$type_reg <- input$type_reg
+      }
+      log_console(paste(input$type_reg))
+      # Capturer la sortie
+      console_text <- capture.output({
+        fitted <- tryCatch({
+          do.call(quantile_spline, args)
+        }, error = function(e) {
+          cat("Error:", e$message, "\n")
+          NULL
+        })
+      })
+
+      # Afficher la sortie capturée
+      for (line in console_text) {
+        if (nchar(line) > 0) {
+          log_console(line)
+        }
+      }
+
+      # Traiter le résultat
+      if (!is.null(fitted)) {
+        x_eval <- seq(min(values$xtab), max(values$xtab), length.out = 300)
+        y_eval <- fitted(x_eval)
+        values$fitted <- fitted
+        values$x_eval <- x_eval
+        values$y_eval <- y_eval
+        color <- input$curve_color
+        values$curve_lines <- c(values$curve_lines, list(list(
+          x = x_eval,
+          y = y_eval,
+          color = color
+        )))
+        showNotification("Regression successful!", type = "message")
+      } else {
+        log_console("=== Regression failed ===", "error")
+      }
+    })
       clean_ansi <- function(text) {
         text <- gsub("gG3;", "", text)
         text <- gsub("G3;", "", text)
@@ -1193,7 +1233,7 @@ server <- function(input, output, session) {
 
       }
     })
-  })
+
 
   # ============ VISUALIZATION ============
 
@@ -1217,12 +1257,12 @@ server <- function(input, output, session) {
     )
 
     # Knots
-    if (!is.null(values$knots)) {
+    if (!is.null(values$knot)) {
       y_range <- range(values$ytab)
       y_pos <- y_range[2] - 0.1 * diff(y_range)
       p <- p %>% add_trace(
-        x = values$knots,
-        y = rep(y_pos, length(values$knots)),
+        x = values$knot,
+        y = rep(y_pos, length(values$knot)),
         type = "scatter",
         mode = "markers",
         marker = list(
@@ -1304,7 +1344,7 @@ server <- function(input, output, session) {
       annotations = list(
         x = 0.02,
         y = 0.98,
-        text = paste("Knots:", length(values$knots)),
+        text = paste("Knots:", length(values$knot)),
         xref = "paper",
         yref = "paper",
         showarrow = FALSE,
@@ -1353,63 +1393,50 @@ server <- function(input, output, session) {
 
   })
   # ============ OUTPUTS ============
-
-  # = INFO =
-  output$fitted_info <- renderPrint({
+  # = INFO = COEFF
+  output$coeff_list<- renderPrint( {
     tryCatch({
       if (is.null(values$fitted)) {
         return('No regression')
       } else
       {
         # Extraire les informations
-        info <- list(
-          degree = NA,
-          knots = NA,
-          coeff = NA,
-          status = NA
-        )
+          list_coeff <- (get_parameters(values$fitted))$coeff
+          status <- (get_parameters(values$fitted))$result$status
+          cat("Status of convergence: ",status,"\n")
+          cat("Number (dimension of the basis): ",
+              length(list_coeff %||% numeric(0)), "\n")
+          cat("Values: \n")
+          cat(list_coeff)
+          }},
+      error = function(e) {
+        cat("Error displaying fit info:", e$message)
+      })
+  })
 
-        if (inherits(values$fitted, "callable_spline")) {
-          params <- get_parameters(values$fitted)
-          info$degree <- params$degree
-          info$knots <- params$knot
-          info$coeff <- params$coeff
-          info$status <- if (!is.null(params$result))
-            params$result$status}
-        else{
-          info$degree <- fitted$degree
-          info$knots <- fitted$knot
-          info$coeff <- fitted$coeff
-          info$status <- if (!is.null(fitted$result))
-            params$fitted$status}
-
-
-        if (!is.na(info$status)) {
-          cat("Solver:", input$solver,"   ",
-          "Status:", info$status, "\n")}
-
-        cat("Degree:", if (!is.na(info$degree))
-          info$degree
+    #===INFO==GENERAL
+  output$fit_info <- renderPrint(
+      {tryCatch({
+      cat("Solver: ",input$solver,"\n")
+      cat("Degree:", if (!is.na(input$degree))
+          input$degree
           else
             "unknown", "   ")
-        cat("Tau:", input$tau, "   ")
-        cat("Knots:", length(info$knots %||% values$knots), "\n")
-        cat("Coefficients: (dimension of the basis)",
-            length(info$coeff %||% numeric(0)),
-            "\n")
+      cat("Tau:", input$tau, "   ")
+      cat("Knots:", if (!is.na(input$degree)){length(input$knot)}
+            else{"Unknown" }, "\n")
+          }
 
-      }
-    }
     , error = function(e) {
-      cat("Error displaying fit info:", e$message)
-    })
+      cat("Error displaying info:", e$message)}
+      )
     constraints <- build_constraints()
     cat("Constraints:\n",
       "Monotone",paste(c(constraints$monot), collapse = ",") ,'\n',
         "Convex",paste(c(constraints$conv),collapse = ",") , "\n",
         "Third derivative",paste( c(constraints$der3),collapse = ",") , "\n"
   )
-})
+  } )
 
   # = Curve cournt =
   output$curve_count <- renderText({
@@ -1477,11 +1504,11 @@ server <- function(input, output, session) {
   })
 
   output$knots_info <- renderPrint({
-    if (is.null(values$knots)) {
+    if (is.null(values$knot)) {
       cat("No knots")
     } else {
-      cat("Knots:", length(values$knots), "\n")
-      print(round(values$knots, 4))
+      cat("Knots:", length(values$knot), "\n")
+      print(round(values$knot, 4))
     }
   })
 
@@ -1538,10 +1565,10 @@ server <- function(input, output, session) {
       "y <- c(",
       paste(round(values$ytab, 4), collapse = ", "),
       ")\n",
-      "knots <- c(",
-      paste(round(values$knots, 4), collapse = ", "),
+      "knot <- c(",
+      paste(round(values$knot, 4), collapse = ", "),
       ")\n\n",
-      "fitted <- quantile_spline(x, y, knots,\n",
+      "fitted <- quantile_spline(x, y, knot,\n",
       "                       tau = ",
       input$tau,
       ",\n",
@@ -1584,7 +1611,7 @@ server <- function(input, output, session) {
   observeEvent(input$clear_all, {
     values$xtab <- NULL
     values$ytab <- NULL
-    values$knots <- NULL
+    values$knot <- NULL
     values$fitted <- NULL
     values$curve_lines <- list()
     values$regions <- list()

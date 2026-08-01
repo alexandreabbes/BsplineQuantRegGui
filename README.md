@@ -9,7 +9,9 @@
 
 BsplineQuantRegGui is an interactive Shiny interface for the BsplineQuantReg package, providing a user-friendly way to perform quantile regression using B-splines with shape constraints.
 
-The package is available on CRAN. The underlying BsplineQuantReg package provides the core regression methods for B-spline quantile regression with Karlin-Studden polynomial sign characterization, including degrees 1 to 4. It provides a small set of robust functions in pure R for polynomial calculation, piecewise polynomial and B-spline manipulation, including differentiation and B-spline coefficient calculations.
+The package is available on CRAN. 
+
+The underlying BsplineQuantReg package provides the core regression methods for B-spline quantile regression with Karlin-Studden polynomial sign characterization, including degrees 1 to 4. It provides a small set of robust functions in pure R for polynomial calculation, piecewise polynomial and B-spline manipulation, including differentiation, B-spline coefficient calculations and transformation to PP-form.
 
 ## Features
 
@@ -24,6 +26,7 @@ This GUI application makes it easy to:
 - Run quantile regression with various solvers
 - Export reproducible R code
 - Run demo presets directly from the interface (according to degree)
+- Type of regression : quantile or quadratic (for 'BsplineQuantReg' version >=0.2.3) 
 
 ## Installation
 
@@ -97,17 +100,14 @@ This package depends on:
 - View/remove all active region constraints in the Regions tab
 
 ### 4. Run Analysis
-- Click Run to execute the regression with your chosen solver
-- View results in the Information and Coefficients panels
+- Click Run to execute the regression with your chosen solver and type of regression ('BsplineQuantReg' >= '0.2.3')
+- View results: the curve and the Information. Coefficients (on the B-spline Basis)
 - View verbose output in the Console tab if verbose = TRUE is selected
-
-### 5. Explore Results
-- Information: Degree, tau, number of knots, and coefficients
-- Coefficients: Min, max, and mean coefficient values
+- Informations: Degree, tau, constraints, knots and coefficients
 - Data: Summary and table of the data
 - R Code: Generated code to reproduce the analysis
 
-### 6. Run Demos
+### 5. Run Demos
 Click on any demo to run it. The degree of the spline is that selected in the GUI.
 
 ## Citation
