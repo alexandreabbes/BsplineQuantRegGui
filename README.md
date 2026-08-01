@@ -13,7 +13,6 @@ The package is available on CRAN.
 The underlying BsplineQuantReg package provides the core regression methods for B-spline quantile regression with Karlin-Studden polynomial sign characterization, including degrees 1 to 4. It provides a small set of robust functions in pure R for polynomial calculation, piecewise polynomial and B-spline manipulation, including differentiation, B-spline coefficients calculations and transformation to PP-form.
 
 ## Features
-
 This GUI application makes it easy to:
 
 - Load and visualize data (from multiple data sources: custom function, CSV files)
