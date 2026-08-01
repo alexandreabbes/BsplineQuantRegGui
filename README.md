@@ -3,7 +3,7 @@
 [![CRAN status](https://www.r-pkg.org/badges/version/BsplineQuantRegGui)](https://cran.r-project.org/package=BsplineQuantRegGui)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/BsplineQuantRegGui)](https://cran.r-project.org/package=BsplineQuantRegGui)
 [![R](https://img.shields.io/badge/R>=4.6-blue.svg)](https://cran.r-project.org/)
-[![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)]
 
 ## Overview
 BsplineQuantRegGui is an interactive Shiny interface for the BsplineQuantReg package, providing a user-friendly way to perform quantile regression using B-splines with shape constraints.

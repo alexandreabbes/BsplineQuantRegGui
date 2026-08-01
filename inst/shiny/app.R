@@ -169,9 +169,10 @@ ui <- fluidPage(
           choices = c("ECOS", "SCS","CLARABEL", "HIGHS", "OSQP", "GUROBI") ) ),
         column(6,selectInput("type_reg","Type of Regr.",
                       choices=c('quantile','mean_square') ) ))),
-      h6(column(
-        6, selectInput("verbose", "Verbose ", choices = c(FALSE, TRUE)))
-      ),
+      fluidRow(h6(column(
+        6, checkboxInput("verbose", "Verbose", FALSE)
+        )
+      )),
 
       hr(),
 
@@ -1155,23 +1156,47 @@ server <- function(input, output, session) {
       if (version >= "0.2.3") {
         args$type_reg <- input$type_reg
       }
-      log_console(paste(input$type_reg))
+
       # Capturer la sortie
-      console_text <- capture.output({
-        fitted <- tryCatch({
-          do.call(quantile_spline, args)
-        }, error = function(e) {
-          cat("Error:", e$message, "\n")
-          NULL
+        #  console_text <-vector('character')
+        #  connec    <- textConnection('console_text', 'wr', local = TRUE)
+
+         # sink(connec)
+        #  fitted<-do.call(quantile_spline, args)
+         # sink()
+        #  close(connec)
+
+#          log_console(console_text)
+      # Afficher la sortie capturée
+      #for (line in console_text) {
+      #  if (nchar(line) > 0) {
+      #    log_console(paste(line))
+      #  }
+      #}
+      # Capturer toutes les sorties
+      console_text <- character()
+
+      # Rediriger stdout
+      sink(tempfile())
+
+      # Capturer les messages
+      withCallingHandlers({
+        output <- capture.output({
+          fitted <- do.call(quantile_spline, args)
         })
+      }, message = function(m) {
+        console_text <<- c(console_text, m$message)
       })
 
-      # Afficher la sortie capturée
-      for (line in console_text) {
-        if (nchar(line) > 0) {
-          log_console(line)
-        }
-      }
+      # Restaurer stdout
+      sink()
+
+      # Ajouter la sortie standard
+      console_all <- output
+    #'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',console_text, '####################')
+
+    log_console(console_all)
+
 
       # Traiter le résultat
       if (!is.null(fitted)) {
@@ -1194,7 +1219,6 @@ server <- function(input, output, session) {
       clean_ansi <- function(text) {
         text <- gsub("gG3;", "", text)
         text <- gsub("G3;", "", text)
-        text <- gsub("g", "", text)
         text <- trimws(text)
         return(text)
       }
@@ -1211,9 +1235,7 @@ server <- function(input, output, session) {
 
       log_console(paste("BsplineQuantReg version:", packageVersion("BsplineQuantReg")))
       if (!is.null(fitted)) {
-        #log_console(print(fitted))
 
-        #fitted<-make_spline(fitted, callable=TRUE, verbose=TRUE)
 
 
         x_eval <- seq(min(values$xtab), max(values$xtab), length.out = 300)
