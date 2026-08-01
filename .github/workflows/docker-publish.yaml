@@ -42,4 +42,12 @@ jobs:
           push: true
           tags: |
       	   ghcr.io/alexandreabbes/bsplinequantreggui:latest
-      	   ghcr.io/alexandreabbes/bsplinequantreggui:${{ github.sha }}
+       	   ghcr.io/alexandreabbes/bsplinequantreggui:${{ github.sha }}
+	tags: |
+  	ghcr.io/${{ github.repository }}:latest
+  	ghcr.io/${{ github.repository }}:${{ github.sha }}
+  	ghcr.io/${{ github.repository }}:v1.0.0
+	
+	
+
+	   
