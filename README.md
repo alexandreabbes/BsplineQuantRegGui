@@ -6,7 +6,6 @@
 [![License: GPL-3](https://img.shields.io/badge/License-GPL--3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 ## Overview
-
 BsplineQuantRegGui is an interactive Shiny interface for the BsplineQuantReg package, providing a user-friendly way to perform quantile regression using B-splines with shape constraints.
 
 The package is available on CRAN. 
