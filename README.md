@@ -26,7 +26,7 @@ This GUI application makes it easy to:
 - Run quantile regression with various solvers
 - Export reproducible R code
 - Run demo presets directly from the interface (according to degree)
-- Type of regression : quantile or quadratic (for 'BsplineQuantReg' version >=0.2.3) 
+- Type of regression : quantile or mean-square (for 'BsplineQuantReg' version >=0.2.3) 
 
 ## Installation
 

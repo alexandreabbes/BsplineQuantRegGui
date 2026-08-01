@@ -5,3 +5,4 @@
 ^docs/
 ^Dockerfile$
 ^nohup.out$
+^core*$
