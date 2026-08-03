@@ -15,8 +15,8 @@ library(BsplineQuantReg)
 
 library(shiny)
 library(shinyjs)
+library(shinythemes)
 library(ECOSolveR)
-
 library(DT)
 library(plotly)
 library(colourpicker)

@@ -6,3 +6,4 @@
 ^Dockerfile$
 ^nohup.out$
 ^core*$
+^cran-comments\.md$
