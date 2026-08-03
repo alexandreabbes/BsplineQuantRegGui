@@ -20,7 +20,6 @@ library(ECOSolveR)
 library(DT)
 library(plotly)
 library(colourpicker)
-library(shinythemes)
 library(png)
 
 # UI ----------------------------------------------------------------------
@@ -1153,6 +1152,12 @@ server <- function(input, output, session) {
       )
 
       # Ajouter le paramètre type_reg si la version est >= 0.2.3
+      if (version == "0.2.2" && input$type_reg=="mean_square"){
+      showNotification("BsplineQuantReg Version 0.2.2 \n
+      does not support mean square regression !\n
+      Falling back to quantile regression.", type = "warning")
+      }
+
       if (version >= "0.2.3") {
         args$type_reg <- input$type_reg
       }
@@ -1193,7 +1198,7 @@ server <- function(input, output, session) {
 
       # Ajouter la sortie standard
       console_all <- output
-    #'CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC',console_text, '####################')
+      version >= "0.2.3"
 
     log_console(console_all)
 
