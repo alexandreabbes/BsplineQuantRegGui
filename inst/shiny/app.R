@@ -15,11 +15,12 @@ library(BsplineQuantReg)
 
 library(shiny)
 library(shinyjs)
-library(shinythemes)
 library(ECOSolveR)
+
 library(DT)
 library(plotly)
 library(colourpicker)
+library(shinythemes)
 library(png)
 
 # UI ----------------------------------------------------------------------
@@ -134,7 +135,7 @@ ui <- fluidPage(
       ), column(
         6,
         numericInput(
-          "knots_count",
+          "auto_knot_count",
           "Auto knots:",
           value = 10,
           min = 2,
@@ -151,8 +152,8 @@ ui <- fluidPage(
           style = "background-color:#FFDD00; color:#000000"
         )
       ), column(
-        4,
-        actionButton("clear_knots", "Clear knots", class = "btn-sm btn-danger")
+        3,
+        actionButton("clear_knots", "Clear \n manual knots", class = "btn-sm btn-danger")
       )),
       br(),
 
@@ -463,6 +464,31 @@ ui <- fluidPage(
           h4("R Code to reproduce the analysis:"),
           verbatimTextOutput("r_code")
         ),
+        tabPanel(
+          "Basis",
+          br(),
+          fluidRow(
+            column(3,
+                   h4("Basis Parameters"),
+                   h4("Derivative"),
+                   sliderInput("basis_derivative", "Derivative order:",
+                               min = 0, max = 4, value = 0, step = 1),
+                   hr(),
+                   h4("Display"),
+                   checkboxInput("basis_show_knots", "Show knots", value = TRUE),
+                   #checkboxInput("basis_show_legend", "Show legend", value = TRUE),
+                   hr(),
+                   actionButton("basis_update", "Update Basis",
+                                class = "btn-primary btn-block"),
+                   br(),
+                   p("Knots:", verbatimTextOutput("knots_info", placeholder = TRUE))
+            ),
+            column(9,
+                   plotOutput("basis_plot", height = "600px")
+
+            )
+          )
+        ),
         tabPanel("Console", br(), fluidRow(column(
           12,
           div(
@@ -503,7 +529,9 @@ server <- function(input, output, session) {
     xtab = NULL,
     ytab = NULL,
     knot = NULL,
-    manual_knots = list(),
+    auto_knot_count = 10,
+    manual_knot = vector(),
+    auto_knot_list = vector(),
     adding_knot = FALSE,
     fitted = NULL,
     x_eval = NULL,
@@ -735,18 +763,20 @@ server <- function(input, output, session) {
   # ============ KNOTS ============
 
   observe({
-    if (!is.null(values$xtab) && length(values$manual_knots) == 0)
+    if (!is.null(values$xtab) && length(values$manual_knot) == 0)
     {
-      if (!is.na(input$knots_count))
+      if (!is.na(input$auto_knot_count))
       {
-        kn <- max((input$knots_count), 2) - 1
+        kn <- max((input$auto_knot_count), 2) - 1
 
-        #if (is.na(knots_count)){knots_count=2}
-        values$knot <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
+        #if (is.na(auto_knot_count)){auto_knot_count=2}
+        values$auto_knot_list <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
+        values$knot<-c(values$auto_knot_list,values$manual_list)
       }
       else{
         kn = 1
-        values$knot = c(0, 1)
+        values$knot = c(min(values$xtab), max(values$xtab))
+        log_console(values$knot)
       }
     }
   })
@@ -792,8 +822,8 @@ server <- function(input, output, session) {
         x <- click$x
         if (x > min(values$xtab) && x < max(values$xtab)) {
           if (!any(abs(values$knot - x) < 1e-6)) {
-            values$manual_knots <- c(values$manual_knots, x)
-            values$knot <- sort(c(values$knot, x))
+            values$manual_knot <- sort(c(values$manual_knot, x))
+            values$knot <- sort(c(values$auto_knot_list, values$manual_knot))
             showNotification(paste("Knot added at x =", round(x, 3)), type = "message")
           } else {
             showNotification("This knot already exists", type = "warning")
@@ -806,9 +836,9 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$clear_knots, {
-    values$manual_knots <- list()
+    values$manual_knot <- vector()
     if (!is.null(values$xtab)) {
-      kn <- max(input$knots_count, 2) - 1
+      kn <- max(input$auto_knot_count, 2) - 1
       values$knot <- quantile(values$xtab, probs = (0:(kn)) / (kn))
     }
     showNotification("knot reset", type = "message")
@@ -1027,9 +1057,9 @@ server <- function(input, output, session) {
       updateNumericInput(session, "data_xmin", value = min(values$xtab))
       updateNumericInput(session, "data_xmax", value = max(values$xtab))
 
-      values$manual_knots <- list()
-      kn <- max(input$knots_count, 2) - 1
-      values$knot <- quantile(values$xtab, probs = (0:(kn)) / (kn))
+      values$manual_knot <- vector()
+      kn <- max(input$auto_knot_count, 2) - 1
+      values$auto_knot_list <- quantile(values$xtab, probs = (0:(kn)) / (kn))
 
       showNotification(paste(
         "File loaded:",
@@ -1091,8 +1121,8 @@ server <- function(input, output, session) {
       updateNumericInput(session, "data_xmin", value = min(values$xtab))
       updateNumericInput(session, "data_xmax", value = max(values$xtab))
 
-      values$manual_knots <- list()
-      kn <- max(input$knot_count, 2) - 1
+      values$manual_knot <- vector()
+      kn <- max(input$auto_knot_count, 2) - 1
       values$knot <- quantile(values$xtab, probs = (0:(kn)) / (kn))
 
       showNotification(paste(
@@ -1150,35 +1180,13 @@ server <- function(input, output, session) {
         verbose = input$verbose,
         callable = TRUE
       )
+      log_console(print(args$knot))
 
       # Ajouter le paramètre type_reg si la version est >= 0.2.3
-      if (version == "0.2.2" && input$type_reg=="mean_square"){
-      showNotification("BsplineQuantReg Version 0.2.2 \n
-      does not support mean square regression !\n
-      Falling back to quantile regression.", type = "warning")
-      }
-
       if (version >= "0.2.3") {
         args$type_reg <- input$type_reg
       }
 
-      # Capturer la sortie
-        #  console_text <-vector('character')
-        #  connec    <- textConnection('console_text', 'wr', local = TRUE)
-
-         # sink(connec)
-        #  fitted<-do.call(quantile_spline, args)
-         # sink()
-        #  close(connec)
-
-#          log_console(console_text)
-      # Afficher la sortie capturée
-      #for (line in console_text) {
-      #  if (nchar(line) > 0) {
-      #    log_console(paste(line))
-      #  }
-      #}
-      # Capturer toutes les sorties
       console_text <- character()
 
       # Rediriger stdout
@@ -1198,9 +1206,8 @@ server <- function(input, output, session) {
 
       # Ajouter la sortie standard
       console_all <- output
-      version >= "0.2.3"
 
-    log_console(console_all)
+      log_console(console_all)
 
 
       # Traiter le résultat
@@ -1450,7 +1457,7 @@ server <- function(input, output, session) {
           else
             "unknown", "   ")
       cat("Tau:", input$tau, "   ")
-      cat("Knots:", if (!is.na(input$degree)){length(input$knot)}
+      cat("Knots:", if (!is.na(input$degree)){length(values$knot)}
             else{"Unknown" }, "\n")
           }
 
@@ -1764,7 +1771,65 @@ server <- function(input, output, session) {
       cat(paste(demo_results$output, collapse = "\n"))
     }
   })
+################VIEW BASIS
+  # ============ BASIS ============
 
+  # Reactive values pour la base
+  basis_values <- reactiveValues(
+    basis_obj = NULL,
+    der_basis_obj = NULL,
+    x_eval = NULL,
+    y_eval = NULL
+  )
+
+  # Mettre à jour la base
+  observeEvent(input$basis_update, {
+    withProgress(message = "Generating basis...", {
+
+      degree <- input$degree
+      # Générer des nœuds uniformes sur [0,1]
+      knot <- values$knot
+
+      # Étendre les nœuds pour la fonction Bspline_base
+      sn <- c(rep(knot[1], degree), knot, rep(rev(knot)[1], degree))
+      log_console(sn)
+      # Construire la base
+      basis_obj <- Bspline_base(sn, degree = degree, verbose = FALSE)
+
+      # Dériver si nécessaire
+      der <- input$basis_derivative
+      if (der > 0) {
+        der_basis_obj <- Bspline_base_deriv(basis_obj, der = der, verbose = FALSE)
+      } else {
+        der_basis_obj <- basis_obj
+      }
+
+      # Points d'évaluation
+      x_min <- min(knot) - 0.1
+      x_max <- max(knot) + 0.1
+      x_eval <- seq(x_min, x_max, length.out = 300)
+
+      # Stocker
+      basis_values$x_eval<-x_eval
+      basis_values$der_basis_obj<-der_basis_obj
+      basis_values$derivative <- der
+
+      showNotification("Basis generated", type = "message")
+    })
+  })
+
+  # Afficher le plot de la base - Utiliser view_basis
+  output$basis_plot <- renderPlot({
+    req(basis_values$der_basis_obj)
+
+    # Utiliser view_basis directement
+    # Avec les paramètres de la GUI
+    view_basis(
+      basis_values$der_basis_obj,
+      x_values = basis_values$x_eval,
+      add_knots = input$basis_show_knots
+    )
+  })
 }
 
 # Run app
