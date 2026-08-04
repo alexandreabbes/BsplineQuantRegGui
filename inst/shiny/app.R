@@ -385,6 +385,31 @@ ui <- fluidPage(
               verbatimTextOutput("coeff_list", placeholder = TRUE))
 
           ),
+####info about knots
+# Dans la colonne des contrôles, sous "Constraints" ou "Execution"
+conditionalPanel(
+  condition = "output.selected_knot_display != 'No knot selected'",
+  h5("Selected Knot:"),
+  verbatimTextOutput("selected_knot_display", placeholder = TRUE)
+),
+          h5("Selected Knot:"),
+
+          verbatimTextOutput("selected_knot_display", placeholder = TRUE),
+          # Dans l'UI, sous "Execution" ou dans un nouvel onglet "Knots"
+          conditionalPanel(
+            condition = "output.selected_knot_display != 'No knot selected'",
+            h5("Knot Multiplicity:"),
+            fluidRow(
+              column(6, actionButton("inc_multiplicity", "+", class = "btn-sm btn-primary")),
+              column(6, actionButton("dec_multiplicity", "-", class = "btn-sm btn-warning"))
+            ),
+            br(),
+            fluidRow(
+              column(6, actionButton("remove_knot", "Remove knot", class = "btn-sm btn-danger")),
+              column(6, actionButton("reset_multiplicity", "Reset", class = "btn-sm btn-info"))
+            ),
+            p("Multiplicity: m=1 (C²), m=2 (C¹), m=3 (C⁰), m=4 (Discontinuity)")
+          ),
 
           hr(),
 
@@ -464,31 +489,89 @@ ui <- fluidPage(
           h4("R Code to reproduce the analysis:"),
           verbatimTextOutput("r_code")
         ),
-        tabPanel(
-          "Basis",
-          br(),
-          fluidRow(
-            column(3,
-                   h4("Basis Parameters"),
-                   h4("Derivative"),
-                   sliderInput("basis_derivative", "Derivative order:",
-                               min = 0, max = 4, value = 0, step = 1),
-                   hr(),
-                   h4("Display"),
-                   checkboxInput("basis_show_knots", "Show knots", value = TRUE),
-                   #checkboxInput("basis_show_legend", "Show legend", value = TRUE),
-                   hr(),
-                   actionButton("basis_update", "Update Basis",
-                                class = "btn-primary btn-block"),
-                   br(),
-                   p("Knots:", verbatimTextOutput("knots_info", placeholder = TRUE))
-            ),
-            column(9,
-                   plotOutput("basis_plot", height = "600px")
+        #tabPanel(
+         # "Basis",
+          #br(),
+          #fluidRow(
+          #  column(3,
+          #         h4("Basis Parameters"),
+          #         h4("Derivative"),
+          #        sliderInput("basis_derivative", "Derivative order:",
+          #                     min = 0, max = 4, value = 0, step = 1),
+          #         hr(),
+          #         h4("Display"),
+          #         checkboxInput("basis_show_knots", "Show knots", value = TRUE),
+          #         #checkboxInput("basis_show_legend", "Show legend", value = TRUE),
+          #         hr(),
+          #         actionButton("basis_update", "Update Basis",
+          #                      class = "btn-primary btn-block"),
+          #         br(),
+          #         p("Knots:", verbatimTextOutput("knots_info", placeholder = TRUE))
+          #  ),
+          #  column(9,
+          #         plotOutput("basis_plot", height = "600px")
 
-            )
-          )
-        ),
+          #  )
+          #),
+
+
+          tabPanel(
+              "Basis",
+              br(),
+              fluidRow(
+                column(
+                  3,
+                  h4("Basis Parameters"),
+                  p("Using current spline configuration:"),
+                  p(strong("Degree:"), textOutput("basis_degree_display", inline = TRUE)),
+                  p(strong("Knots:"), textOutput("basis_knot_count_display", inline = TRUE)),
+
+                  hr(),
+                  h4("Derivative"),
+                  sliderInput("basis_derivative", "Derivative order:",
+                              min = 0, max = 4, value = 0, step = 1),
+
+                  hr(),
+                  h4("Knot Multiplicity"),
+                  p("Click on a knot in the plot to select it."),
+                  p("Then use the buttons below to adjust multiplicity:"),
+                  p("m=1: C², m=2: C¹, m=3: C⁰, m=4: Discontinuity"),
+
+                  fluidRow(
+                    column(6, actionButton("basis_inc_multiplicity", "Increase m",
+                                           class = "btn-sm btn-primary", style = "width:100%;")),
+                    column(6, actionButton("basis_dec_multiplicity", "Decrease m",
+                                           class = "btn-sm btn-warning", style = "width:100%;"))
+                  ),
+                  br(),
+                  actionButton("basis_remove_knot", "Remove selected knot",
+                               class = "btn-sm btn-danger", style = "width:100%;"),
+                  br(), br(),
+                  actionButton("basis_reset_knots", "Reset multiplicities",
+                               class = "btn-sm btn-info", style = "width:100%;"),
+
+                  hr(),
+                  h4("Knot Multiplicities"),
+                  verbatimTextOutput("basis_multiplicity_info", placeholder = TRUE),
+
+                  hr(),
+                  h4("Display"),
+                  checkboxInput("basis_show_knots", "Show knots", value = TRUE),
+                  checkboxInput("basis_show_multiplicity", "Show multiplicity labels", value = TRUE),
+
+                  hr(),
+                  actionButton("basis_update", "Update Basis",
+                               class = "btn-primary btn-block")
+                ),
+                column(
+                  9,
+                  plotOutput("basis_plot", height = "600px", click = "basis_plot_click"),
+                  br(),
+                  h5("Basis Information"),
+                  verbatimTextOutput("basis_info", placeholder = TRUE)
+                )
+              )
+            ),
         tabPanel("Console", br(), fluidRow(column(
           12,
           div(
@@ -762,25 +845,55 @@ server <- function(input, output, session) {
 
   # ============ KNOTS ============
 
+  # observe({
+  #   if (!is.null(values$xtab) && length(values$manual_knot) == 0)
+  #   {
+  #     if (!is.na(input$auto_knot_count))
+  #     {
+  #       kn <- max((input$auto_knot_count), 2) - 1
+  #
+  #       #if (is.na(auto_knot_count)){auto_knot_count=2}
+  #       values$auto_knot_list <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
+  #       values$knot<-c(values$auto_knot_list,values$manual_list)
+  #     }
+  #     else{
+  #       kn = 1
+  #       values$knot = c(min(values$xtab), max(values$xtab))
+  #       log_console(values$knot)
+  #     }
+  #   }
+  # })
+
+  # ============ KNOTS ============
+
   observe({
-    if (!is.null(values$xtab) && length(values$manual_knot) == 0)
-    {
-      if (!is.na(input$auto_knot_count))
-      {
+    if (!is.null(values$xtab) && length(values$manual_knot) == 0) {
+      if (!is.na(input$auto_knot_count)) {
         kn <- max((input$auto_knot_count), 2) - 1
 
-        #if (is.na(auto_knot_count)){auto_knot_count=2}
-        values$auto_knot_list <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
-        values$knot<-c(values$auto_knot_list,values$manual_list)
-      }
-      else{
-        kn = 1
-        values$knot = c(min(values$xtab), max(values$xtab))
-        log_console(values$knot)
+        # Générer les nœuds quantiles
+        knot_values <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
+
+        # Multiplicités initiales
+        degree <- input$degree
+        mult <- rep(1, length(knot_values))
+        mult[1] <- degree + 1
+        mult[length(mult)] <- degree + 1
+
+        # Stocker
+        values$knot <- knot_values
+        values$knot_metadata <- data.frame(
+          knot = knot_values,
+          multiplicity = mult,
+          is_manual = FALSE,
+          stringsAsFactors = FALSE
+        )
+
+        # Construire la séquence étendue pour la base B-spline
+        values$knot_extended <- build_knot_sequence(knot_values, mult)
       }
     }
   })
-
   output$knots_compact <- renderPrint({
     if (!is.null(values$knot) && length(values$knot) > 0) {
       k <- round(values$knot, 3)
@@ -1165,12 +1278,16 @@ server <- function(input, output, session) {
 
       # Vérifier la version de BsplineQuantReg
       version <- packageVersion("BsplineQuantReg")
+      #Extended knot sequence with interior multiplicities (regularity control)
+      mult_knot<-build_knot_sequence(
+        values$knot_metadata$knot,
+        values$knot_metadata$multiplicity)
 
       # Paramètres communs
       args <- list(
         as.vector(values$xtab),
         as.vector(values$ytab),
-        knot=as.vector(values$knot),
+        knot=mult_knot, #as.vector(values$knot),
         tau = input$tau,
         degree = as.numeric(input$degree),
         monot = constraints$monot,
@@ -1270,9 +1387,8 @@ server <- function(input, output, session) {
 
 
   # ============ VISUALIZATION ============
-
   output$spline_plot <- renderPlotly({
-    req(values$xtab)
+    req(values$xtab, values$ytab)
 
     p <- plot_ly(source = "plot")
 
@@ -1282,55 +1398,85 @@ server <- function(input, output, session) {
       y = values$ytab,
       type = "scatter",
       mode = "markers",
-      marker = list(
-        color = "gray",
-        size = 6,
-        opacity = 0.5
-      ),
+      marker = list(color = "gray", size = 6, opacity = 0.5),
       name = "Data"
     )
-
-    # Knots
-    if (!is.null(values$knot)) {
-      y_range <- range(values$ytab)
+    # Dans le plot de visualisation, afficher les multiplicités
+    if (!is.null(values$knot_metadata)) {
+      y_range <- range(values$ytab, na.rm = TRUE)
       y_pos <- y_range[2] - 0.1 * diff(y_range)
+
+      for (i in seq_len(nrow(values$knot_metadata))) {
+        mult <- values$knot_metadata$multiplicity[i]
+
+        # Couleur selon multiplicité
+        color <- switch(as.character(mult),
+                        "1" = "blue",
+                        "2" = "orange",
+                        "3" = "red",
+                        "4" = "darkred",
+                        "gray")
+
+        # Symbole selon multiplicité
+        symbol <- switch(as.character(mult),
+                         "1" = "circle",
+                         "2" = "square",
+                         "3" = "diamond",
+                         "4" = "cross",
+                         "circle")
+
+        p <- p %>% add_trace(
+          x = values$knot_metadata$knot[i],
+          y = y_pos,
+          type = "scatter",
+          mode = "markers+text",
+          marker = list(color = color, symbol = symbol, size = 12),
+          text = paste0("m=", mult),
+          textposition = "top center",
+          textfont = list(size = 8, color = "black"),
+          name = "Knots",
+          showlegend = FALSE
+        )
+      }
+    }
+    # Knots
+    if (!is.null(values$knot) && length(values$knot) > 0) {
+      y_range <- range(values$ytab, na.rm = TRUE)
+      y_pos <- y_range[2] - 0.1 * diff(y_range)
+
       p <- p %>% add_trace(
         x = values$knot,
         y = rep(y_pos, length(values$knot)),
         type = "scatter",
         mode = "markers",
-        marker = list(
-          color = "red",
-          symbol = "triangle-down",
-          size = 10
-        ),
+        marker = list(color = "red", symbol = "triangle-down", size = 10),
         name = "Knots"
       )
+
+      # Ajouter le marqueur du nœud sélectionné (utiliser selected_knot())
+      idx <- selected_knot()
+      if (!is.null(idx) && idx >= 1 && idx <= length(values$knot)) {
+        p <- p %>% add_trace(
+          x = values$knot[idx],
+          y = y_pos,
+          type = "scatter",
+          mode = "markers",
+          marker = list(color = "green", symbol = "circle", size = 20, opacity = 0.7),
+          name = "Selected Knot"
+        )
+      }
+
     }
 
     # Regions
-    if (input$constraint_mode == "region" &&
-        length(values$regions) > 0) {
-      y_range <- range(values$ytab)
+    if (input$constraint_mode == "region" && length(values$regions) > 0) {
+      y_range <- range(values$ytab, na.rm = TRUE)
       for (region in values$regions) {
-        is_selected <- !is.null(values$selected_region_id) &&
-          values$selected_region_id == region$id
-        border_color <- if (is_selected)
-          "#ff0000"
-        else
-          "rgba(255, 152, 0, 0.8)"
-        fill_color <- if (is_selected)
-          "rgba(255, 0, 0, 0.15)"
-        else
-          "rgba(255, 152, 0, 0.15)"
+        is_selected <- !is.null(values$selected_region_id) && values$selected_region_id == region$id
+        border_color <- if (is_selected) "#ff0000" else "rgba(255, 152, 0, 0.8)"
+        fill_color <- if (is_selected) "rgba(255, 0, 0, 0.15)" else "rgba(255, 152, 0, 0.15)"
         p <- p %>% add_trace(
-          x = c(
-            region$xmin,
-            region$xmax,
-            region$xmax,
-            region$xmin,
-            region$xmin
-          ),
+          x = c(region$xmin, region$xmax, region$xmax, region$xmin, region$xmin),
           y = c(y_range[1], y_range[1], y_range[2], y_range[2], y_range[1]),
           type = "scatter",
           mode = "lines",
@@ -1340,22 +1486,11 @@ server <- function(input, output, session) {
           name = paste0("Region ", region$id),
           hoverinfo = "text",
           text = paste0(
-            "Region ",
-            region$id,
-            "\n",
-            "[",
-            round(region$xmin, 3),
-            ", ",
-            round(region$xmax, 3),
-            "]\n",
-            "M: ",
-            get_sym(region$monot, c("down", "x", "up")),
-            "\n",
-            "C: ",
-            get_sym(region$conv, c("n", "x", "U")),
-            "\n",
-            "D3: ",
-            get_sym(region$der3, c("-", "x", "+"))
+            "Region ", region$id, "\n",
+            "[", round(region$xmin, 3), ", ", round(region$xmax, 3), "]\n",
+            "M: ", get_sym(region$monot, c("down", "x", "up")), "\n",
+            "C: ", get_sym(region$conv, c("n", "x", "U")), "\n",
+            "D3: ", get_sym(region$der3, c("-", "x", "+"))
           )
         )
       }
@@ -1363,22 +1498,24 @@ server <- function(input, output, session) {
 
     # Curves
     for (curve in values$curve_lines) {
-      p <- p %>% add_trace(
-        x = curve$x,
-        y = curve$y,
-        type = "scatter",
-        mode = "lines",
-        line = list(color = curve$color, width = 2),
-        name = paste0("tau=", input$tau)
-      )
+      if (!is.null(curve$x) && !is.null(curve$y)) {
+        p <- p %>% add_trace(
+          x = curve$x,
+          y = curve$y,
+          type = "scatter",
+          mode = "lines",
+          line = list(color = curve$color, width = 2),
+          name = paste0("tau=", input$tau)
+        )
+      }
     }
 
-    # Annotation
+    # Layout
     p <- p %>% layout(
       annotations = list(
         x = 0.02,
         y = 0.98,
-        text = paste("Knots:", length(values$knot)),
+        text = paste("Knots:", length(values$knot %||% numeric(0))),
         xref = "paper",
         yref = "paper",
         showarrow = FALSE,
@@ -1388,11 +1525,7 @@ server <- function(input, output, session) {
       yaxis = list(title = "y"),
       hovermode = "closest",
       legend = list(orientation = "h", y = -0.1),
-      dragmode = if (values$selecting_region &&
-                     input$constraint_mode == "region")
-        "select"
-      else
-        "zoom"
+      dragmode = if (values$selecting_region && input$constraint_mode == "region") "select" else "zoom"
     )
 
     p <- p %>% config(
@@ -1401,77 +1534,280 @@ server <- function(input, output, session) {
       modeBarButtonsToRemove = c("sendDataToCloud", "resetViews")
     )
 
-    p
+    #p
   })
 
-  # ============ REGION SELECTION BY CLICK ============
+  # output$spline_plot <- renderPlotly({
+  #   req(values$xtab)
+  #
+  #   p <- plot_ly(source = "plot")
+  #
+  #   # Data
+  #   p <- p %>% add_trace(
+  #     x = values$xtab,
+  #     y = values$ytab,
+  #     type = "scatter",
+  #     mode = "markers",
+  #     marker = list(
+  #       color = "gray",
+  #       size = 6,
+  #       opacity = 0.5
+  #     ),
+  #     name = "Data"
+  #   )
+  #
+  #   # Knots
+  #   if (!is.null(values$knot)) {
+  #     y_range <- range(values$ytab)
+  #     y_pos <- y_range[2] - 0.1 * diff(y_range)
+  #     p <- p %>% add_trace(
+  #       x = values$knot,
+  #       y = rep(y_pos, length(values$knot)),
+  #       type = "scatter",
+  #       mode = "markers",
+  #       marker = list(
+  #         color = "red",
+  #         symbol = "triangle-down",
+  #         size = 10
+  #       ),
+  #       name = "Knots"
+  #     )
+  #   }
+  #
+  #   # Regions
+  #   if (input$constraint_mode == "region" &&
+  #       length(values$regions) > 0) {
+  #     y_range <- range(values$ytab)
+  #     for (region in values$regions) {
+  #       is_selected <- !is.null(values$selected_region_id) &&
+  #         values$selected_region_id == region$id
+  #       border_color <- if (is_selected)
+  #         "#ff0000"
+  #       else
+  #         "rgba(255, 152, 0, 0.8)"
+  #       fill_color <- if (is_selected)
+  #         "rgba(255, 0, 0, 0.15)"
+  #       else
+  #         "rgba(255, 152, 0, 0.15)"
+  #       p <- p %>% add_trace(
+  #         x = c(
+  #           region$xmin,
+  #           region$xmax,
+  #           region$xmax,
+  #           region$xmin,
+  #           region$xmin
+  #         ),
+  #         y = c(y_range[1], y_range[1], y_range[2], y_range[2], y_range[1]),
+  #         type = "scatter",
+  #         mode = "lines",
+  #         fill = "toself",
+  #         fillcolor = fill_color,
+  #         line = list(color = border_color, width = ifelse(is_selected, 3, 1)),
+  #         name = paste0("Region ", region$id),
+  #         hoverinfo = "text",
+  #         text = paste0(
+  #           "Region ",
+  #           region$id,
+  #           "\n",
+  #           "[",
+  #           round(region$xmin, 3),
+  #           ", ",
+  #           round(region$xmax, 3),
+  #           "]\n",
+  #           "M: ",
+  #           get_sym(region$monot, c("down", "x", "up")),
+  #           "\n",
+  #           "C: ",
+  #           get_sym(region$conv, c("n", "x", "U")),
+  #           "\n",
+  #           "D3: ",
+  #           get_sym(region$der3, c("-", "x", "+"))
+  #         )
+  #       )
+  #     }
+  #   }
+  #
+  #
+  #
+  #   # Curves
+  #   for (curve in values$curve_lines) {
+  #     p <- p %>% add_trace(
+  #       x = curve$x,
+  #       y = curve$y,
+  #       type = "scatter",
+  #       mode = "lines",
+  #       line = list(color = curve$color, width = 2),
+  #       name = paste0("tau=", input$tau)
+  #     )
+  #   }
+  #
+  #   # Annotation
+  #   p <- p %>% layout(
+  #     annotations = list(
+  #       x = 0.02,
+  #       y = 0.98,
+  #       text = paste("Knots:", length(values$knot)),
+  #       xref = "paper",
+  #       yref = "paper",
+  #       showarrow = FALSE,
+  #       font = list(size = 12, color = "red")
+  #     ),
+  #     xaxis = list(title = "x"),
+  #     yaxis = list(title = "y"),
+  #     hovermode = "closest",
+  #     legend = list(orientation = "h", y = -0.1),
+  #     dragmode = if (values$selecting_region &&
+  #                    input$constraint_mode == "region")
+  #       "select"
+  #     else
+  #       "zoom"
+  #   )
+  #
+  #   p <- p %>% config(
+  #     scrollZoom = TRUE,
+  #     displaylogo = FALSE,
+  #     modeBarButtonsToRemove = c("sendDataToCloud", "resetViews")
+  #   )
+  #
+  #   # Dans la création du plot principal (spline_plot)
+  #   # Ajouter un marqueur pour le nœud sélectionné
+  #   selected_idx <- selected_knot()
+  #   if (!is.null(selected_idx) && !is.null(values$knot)) {
+  #     p <- p %>% add_trace(
+  #       x = values$knot[selected_idx],
+  #       y = y_pos,
+  #       type = "scatter",
+  #       mode = "markers",
+  #       marker = list(
+  #         color = "green",
+  #         symbol = "circle",
+  #         size = 20,
+  #           opacity = 0.7
+  #     ),
+  #     name = "Selected Knot"
+  #   )
+  # }
+  #   })
+  # ============ KNOT SELECTION FROM VISUALIZATION ============
 
+  # Reactive value pour le nœud sélectionné
+  selected_knot <- reactiveVal(NULL)
+
+  # Observer les clics sur le plot principal
   observeEvent(event_data("plotly_click", source = "plot"), {
-    if (!values$selecting_region && input$constraint_mode == "region") {
-      click <- event_data("plotly_click", source = "plot")
-      if (!is.null(click)) {
-        x <- click$x
-        for (region in values$regions) {
-          if (x >= region$xmin && x <= region$xmax) {
-            values$selected_region_id <- region$id
-            update_region_fields(region$xmin, region$xmax)
-            updateRadioButtons(session, "region_monot", selected = as.character(region$monot))
-            updateRadioButtons(session, "region_conv", selected = as.character(region$conv))
-            updateRadioButtons(session, "region_der3", selected = as.character(region$der3))
-            showNotification(paste("Region", region$id, "selected"), type = "message")
-            break
+    click <- event_data("plotly_click", source = "plot")
+
+    if (!is.null(click) && !is.null(values$knot)) {
+      x <- click$x
+
+      # Trouver le nœud le plus proche
+      knot <- values$knot
+      distances <- abs(knot - x)
+      min_dist <- min(distances)
+
+      # Seuil de sélection (2% de l'intervalle des nœuds)
+      threshold <- 0.02 * diff(range(knot))
+
+      if (min_dist < threshold) {
+        idx <- which.min(distances)
+        selected_knot(idx)
+        showNotification(paste("Knot selected:", round(knot[idx], 4)),
+                         type = "message", duration = 2)
+      } else {
+        # Désélectionner si on clique ailleurs
+        selected_knot(NULL)
+      }
+    }
+  })
+  # Afficher le nœud sélectionné
+  output$selected_knot_display <- renderPrint({
+    idx <- selected_knot()
+    if (!is.null(idx) && !is.null(values$knot)) {
+      cat("Selected knot:\n")
+      cat("  Index:", idx, "\n")
+      cat("  Value:", round(values$knot[idx], 4), "\n")
+    } else {
+      cat("No knot selected\n")
+      cat("Click on a knot in the plot to select it.")
+    }
+  })
+    # ============ REGION SELECTION BY CLICK ============
+
+    observeEvent(event_data("plotly_click", source = "plot"), {
+      if (!values$selecting_region && input$constraint_mode == "region") {
+        click <- event_data("plotly_click", source = "plot")
+        if (!is.null(click)) {
+          x <- click$x
+          for (region in values$regions) {
+            if (x >= region$xmin && x <= region$xmax) {
+              values$selected_region_id <- region$id
+              update_region_fields(region$xmin, region$xmax)
+              updateRadioButtons(session, "region_monot", selected = as.character(region$monot))
+              updateRadioButtons(session, "region_conv", selected = as.character(region$conv))
+              updateRadioButtons(session, "region_der3", selected = as.character(region$der3))
+              showNotification(paste("Region", region$id, "selected"), type = "message")
+              break
+            }
           }
         }
       }
-    }
 
-  })
-  # ============ OUTPUTS ============
-  # = INFO = COEFF
-  output$coeff_list<- renderPrint( {
-    tryCatch({
-      if (is.null(values$fitted)) {
-        return('No regression')
-      } else
-      {
-        # Extraire les informations
-          list_coeff <- (get_parameters(values$fitted))$coeff
-          status <- (get_parameters(values$fitted))$result$status
-          cat("Status of convergence: ",status,"\n")
-          cat("Number (dimension of the basis): ",
-              length(list_coeff %||% numeric(0)), "\n")
-          cat("Values: \n")
-          cat(list_coeff)
-          }},
-      error = function(e) {
-        cat("Error displaying fit info:", e$message)
-      })
-  })
+    })
+    # ============ OUTPUTS ============
+    # = INFO = COEFF
+    output$coeff_list<- renderPrint( {
+      tryCatch({
+        if (is.null(values$fitted)) {
+          return('No regression')
+        } else
+        {
+          # Extraire les informations
+            list_coeff <- (get_parameters(values$fitted))$coeff
+            status <- (get_parameters(values$fitted))$result$status
+            cat("Status of convergence: ",status,"\n")
+            cat("Number (dimension of the basis): ",
+                length(list_coeff %||% numeric(0)), "\n")
+            cat("Values: \n")
+            cat(list_coeff)
+            }},
+        error = function(e) {
+          cat("Error displaying fit info:", e$message)
+        })
+    })
 
-    #===INFO==GENERAL
-  output$fit_info <- renderPrint(
-      {tryCatch({
-      cat("Solver: ",input$solver,"\n")
-      cat("Degree:", if (!is.na(input$degree))
-          input$degree
-          else
-            "unknown", "   ")
-      cat("Tau:", input$tau, "   ")
-      cat("Knots:", if (!is.na(input$degree)){length(values$knot)}
-            else{"Unknown" }, "\n")
-          }
+      #===INFO==GENERAL
+    output$fit_info <- renderPrint(
+        {tryCatch({
+        cat("Solver: ",input$solver,"\n")
+        cat("Degree:", if (!is.na(input$degree))
+            input$degree
+            else
+              "unknown", "   ")
+        cat("Tau:", input$tau, "   ")
+        cat("Knots:", if (!is.na(input$degree)){length(values$knot)}
+              else{"Unknown" }, "\n")
+            }
 
-    , error = function(e) {
-      cat("Error displaying info:", e$message)}
-      )
-    constraints <- build_constraints()
-    cat("Constraints:\n",
-      "Monotone",paste(c(constraints$monot), collapse = ",") ,'\n',
-        "Convex",paste(c(constraints$conv),collapse = ",") , "\n",
-        "Third derivative",paste( c(constraints$der3),collapse = ",") , "\n"
-  )
-  } )
-
+      , error = function(e) {
+        cat("Error displaying info:", e$message)}
+        )
+      constraints <- build_constraints()
+      cat("Constraints:\n",
+        "Monotone",paste(c(constraints$monot), collapse = ",") ,'\n',
+          "Convex",paste(c(constraints$conv),collapse = ",") , "\n",
+          "Third derivative",paste( c(constraints$der3),collapse = ",") , "\n"
+    )
+    } )
+    output$knot_list_display <- renderPrint({
+      if (is.null(values$knot)) {
+        cat("No knots defined")
+      } else {
+        cat("All knots:\n")
+        for (i in seq_along(values$knot)) {
+          cat(sprintf("  [%d] %.4f\n", i, values$knot[i]))
+        }
+      }
+    })
   # = Curve cournt =
   output$curve_count <- renderText({
     length(values$curve_lines)
@@ -1773,26 +2109,57 @@ server <- function(input, output, session) {
   })
 ################VIEW BASIS
   # ============ BASIS ============
-
-  # Reactive values pour la base
   basis_values <- reactiveValues(
     basis_obj = NULL,
     der_basis_obj = NULL,
     x_eval = NULL,
-    y_eval = NULL
+    y_eval = NULL,
+    knots = NULL,
+    multiplicities = NULL,
+    selected_knot_index = NULL
   )
+  # Reactive values pour la base
+  #basis_values <- reactiveValues(
+  #  basis_obj = NULL,
+  #  der_basis_obj = NULL,
+  #  x_eval = NULL,
+  #  y_eval = NULL
+  #)
+  #veriosn3
 
-  # Mettre à jour la base
+  #version2
   observeEvent(input$basis_update, {
     withProgress(message = "Generating basis...", {
 
       degree <- input$degree
-      # Générer des nœuds uniformes sur [0,1]
-      knot <- values$knot
 
-      # Étendre les nœuds pour la fonction Bspline_base
-      sn <- c(rep(knot[1], degree), knot, rep(rev(knot)[1], degree))
-      log_console(sn)
+      # Utiliser la séquence étendue avec multiplicités
+      if (!is.null(values$knot_extended) && length(values$knot_extended) > 0) {
+        sn <- values$knot_extended
+      } else if (!is.null(values$knot)) {
+        # Fallback: construire manuellement
+        knot <- values$knot
+        #sn <- c(rep(knot[1], degree), knot, rep(rev(knot)[1], degree))
+        sn<-build_knot_sequence(
+          values$knot_metadata$knot,
+          values$knot_metadata$multiplicity)
+      } else {
+        showNotification("No knots available", type = "warning")
+        return()
+      }
+
+      # Construire la base
+      basis_obj <- Bspline_base(sn, degree = degree, verbose = FALSE)
+
+      knot <- values$knot
+      log_console(paste("Basis knots:", paste(round(knot, 4), collapse = ", ")))
+
+      # Construire la séquence de nœuds étendus pour Bspline_base
+      # Les extrémités doivent apparaître degree+1 fois pour les B-splines
+      #sn <- c(rep(knot[1], degree), knot, rep(rev(knot)[1], degree))
+      build_knot_sequence(
+        values$knot_metadata$knot,
+        values$knot_metadata$multiplicity)
       # Construire la base
       basis_obj <- Bspline_base(sn, degree = degree, verbose = FALSE)
 
@@ -1804,32 +2171,294 @@ server <- function(input, output, session) {
         der_basis_obj <- basis_obj
       }
 
-      # Points d'évaluation
-      x_min <- min(knot) - 0.1
-      x_max <- max(knot) + 0.1
+      # Points d'évaluation (avec une marge)
+      x_min <- min(knot) - 0.1 * diff(range(knot))
+      x_max <- max(knot) + 0.1 * diff(range(knot))
       x_eval <- seq(x_min, x_max, length.out = 300)
 
       # Stocker
-      basis_values$x_eval<-x_eval
-      basis_values$der_basis_obj<-der_basis_obj
+      basis_values$basis_obj <- basis_obj
+      basis_values$der_basis_obj <- der_basis_obj
+      basis_values$x_eval <- x_eval
+      basis_values$degree <- degree
       basis_values$derivative <- der
+      basis_values$knots <- knot
 
-      showNotification("Basis generated", type = "message")
+      # Initialiser les multiplicités (1 par défaut)
+      basis_values$multiplicities <- rep(1, length(knot))
+      basis_values$selected_knot_index <- NULL
+
+      showNotification(paste("Basis generated (degree", degree, ",", length(knot), "knots)"),
+                       type = "message")
     })
   })
+  ## version1
+  # # Mettre à jour la base
+  # observeEvent(input$basis_update, {
+  #   withProgress(message = "Generating basis...", {
+  #
+  #     degree <- input$degree
+  #     # Générer des nœuds uniformes sur [0,1]
+  #     knot <- values$knot
+  #
+  #     # Étendre les nœuds pour la fonction Bspline_base
+  #     sn <- c(rep(knot[1], degree), knot, rep(rev(knot)[1], degree))
+  #     log_console(sn)
+  #     # Construire la base
+  #     basis_obj <- Bspline_base(sn, degree = degree, verbose = FALSE)
+  #
+  #     # Dériver si nécessaire
+  #     der <- input$basis_derivative
+  #     if (der > 0) {
+  #       der_basis_obj <- Bspline_base_deriv(basis_obj, der = der, verbose = FALSE)
+  #     } else {
+  #       der_basis_obj <- basis_obj
+  #     }
+  #
+  #     # Points d'évaluation
+  #     x_min <- min(knot) - 0.1
+  #     x_max <- max(knot) + 0.1
+  #     x_eval <- seq(x_min, x_max, length.out = 300)
+  #
+  #     # Stocker
+  #     basis_values$x_eval<-x_eval
+  #     basis_values$der_basis_obj<-der_basis_obj
+  #     basis_values$derivative <- der
+  #
+  #     showNotification("Basis generated", type = "message")
+  #   })
+  # })
 
-  # Afficher le plot de la base - Utiliser view_basis
+  # # Afficher le plot de la base - Utiliser view_basis
+  # output$basis_plot <- renderPlot({
+  #   req(basis_values$der_basis_obj)
+  #
+  #   # Utiliser view_basis directement
+  #   # Avec les paramètres de la GUI
+  #   view_basis(
+  #     basis_values$der_basis_obj,
+  #     x_values = basis_values$x_eval,
+  #     add_knots = input$basis_show_knots
+  #   )
+  # })
+  # Afficher le plot de la base
   output$basis_plot <- renderPlot({
-    req(basis_values$der_basis_obj)
+    req(basis_values$der_basis_obj, basis_values$x_eval)
 
-    # Utiliser view_basis directement
-    # Avec les paramètres de la GUI
+    # Utiliser view_basis avec les paramètres
     view_basis(
       basis_values$der_basis_obj,
       x_values = basis_values$x_eval,
       add_knots = input$basis_show_knots
     )
+
+    # Ajouter un titre personnalisé avec les infos
+    der <- input$basis_derivative
+    title <- if (der == 0) {
+      paste("B-spline Basis (degree", input$degree, ",", length(basis_values$knots), "knots)")
+    } else {
+      paste("B-spline Basis -", der, if (der == 1) "st" else if (der == 2) "nd" else if (der == 3) "rd" else "th",
+            "derivative (degree", input$degree, ")")
+    }
+    title(title)
   })
+
+  # Informations sur la base
+  output$basis_info <- renderPrint({
+    req(basis_values$der_basis_obj)
+
+    obj <- basis_values$der_basis_obj
+    cat("B-spline Basis Information\n")
+    cat("==========================\n")
+    cat("Degree:", obj$degree, "\n")
+    cat("Original degree:", input$degree, "\n")
+    cat("Number of basis functions:", obj$n_splines, "\n")
+    cat("Number of knots:", length(basis_values$knots %||% numeric(0)), "\n")
+    cat("Derivative order:", input$basis_derivative, "\n")
+    cat("Basis dimension:", paste(dim(obj$base), collapse = " x "), "\n")
+  })
+
+  output$basis_multiplicity_info <- renderPrint({
+    if (!is.null(values$knot_metadata)) {
+      df <- values$knot_metadata
+      cat("Knot multiplicities:\n")
+      for (i in seq_len(nrow(df))) {
+        cat(sprintf("  %.4f: m=%d\n", df$knot[i], df$multiplicity[i]))
+      }
+    } else {
+      cat("No knots defined")
+    }
+  })
+  # Informations sur les multiplicités
+  # output$basis_multiplicity_info <- renderPrint({
+  #   if (!is.null(basis_values$knots) && !is.null(basis_values$multiplicities)) {
+  #     knots <- basis_values$knots
+  #     mult <- basis_values$multiplicities
+  #     cat("Knot multiplicities:\n")
+  #     for (i in seq_along(knots)) {
+  #       status <- if (mult[i] == 0) "removed" else paste0("m=", mult[i])
+  #       cat(sprintf("  %.4f: %s\n", knots[i], status))
+  #     }
+  #   } else {
+  #     cat("No knots defined")
+  #   }
+  # })
+
+  # Dans le plot de la base
+  output$basis_plot <- renderPlot({
+    req(basis_values$der_basis_obj, basis_values$x_eval)
+
+    # Utiliser view_basis
+    view_basis(
+      basis_values$der_basis_obj,
+      x_values = basis_values$x_eval,
+      add_knots = input$basis_show_knots
+    )
+
+    # Ajouter les multiplicités manuellement
+    if (input$basis_show_knots && !is.null(values$knot_metadata)) {
+      y_range <- par("usr")[3:4]
+      y_pos <- y_range[1] + 0.02 * diff(y_range)
+
+      for (i in seq_len(nrow(values$knot_metadata))) {
+        mult <- values$knot_metadata$multiplicity[i]
+        if (mult > 0) {
+          text(values$knot_metadata$knot[i], y_pos,
+               labels = paste0("m=", mult),
+               col = "blue", cex = 0.7, srt = 90, adj = 0)
+        }
+      }
+    }
+  })
+  # ============ KNOT MULTIPLICITY CONTROL ============
+
+# Augmenter la multiplicité
+observeEvent(input$inc_multiplicity, {
+  idx <- selected_knot()
+  if (is.null(idx)) {
+    showNotification("Select a knot first!", type = "warning")
+    return()
+  }
+
+  # Vérifier que ce n'est pas un nœud d'extrémité
+  if (idx == 1 || idx == length(values$knot)) {
+    showNotification("Cannot modify endpoint knots!", type = "warning")
+    return()
+  }
+
+  # Ici, la logique de modification de multiplicité
+  # (à adapter selon votre implémentation)
+  showNotification(paste("Increased multiplicity of knot", idx), type = "message")
+})
+
+# Diminuer la multiplicité
+observeEvent(input$dec_multiplicity, {
+  idx <- selected_knot()
+  if (is.null(idx)) {
+    showNotification("Select a knot first!", type = "warning")
+    return()
+  }
+
+  if (idx == 1 || idx == length(values$knot)) {
+    showNotification("Cannot modify endpoint knots!", type = "warning")
+    return()
+  }
+
+  showNotification(paste("Decreased multiplicity of knot", idx), type = "message")
+})
+
+# ============ KNOT MANAGEMENT ============
+
+# Construire la séquence de nœuds avec multiplicités
+build_knot_sequence <- function(knots, multiplicities) {
+  # knots: vecteur des nœuds uniques
+  # multiplicities: vecteur des multiplicités (même longueur)
+
+  if (length(knots) != length(multiplicities)) {
+    stop("knots and multiplicities must have same length")
+  }
+
+  # Construire la séquence étendue
+  knot_seq <- c()
+  for (i in seq_along(knots)) {
+    knot_seq <- c(knot_seq, rep(knots[i], multiplicities[i]))
+  }
+
+  return(knot_seq)
+}
+
+# Initialiser les nœuds avec multiplicités
+init_knots <- function(xtab, n_knots) {
+  # Générer des nœuds quantiles
+  knots <- quantile(xtab, probs = seq(0, 1, length.out = n_knots + 1))
+
+  # Multiplicités initiales (1 par défaut pour les nœuds internes)
+  # Les extrémités ont multiplicité degree + 1
+  degree <- input$degree
+  mult <- rep(1, length(knots))
+  mult[1] <- degree + 1
+  mult[length(mult)] <- degree + 1
+
+  return(list(knots = knots, multiplicities = mult))
+}
+
+# ============ MULTIPLICITY CONTROL ============
+
+# Mettre à jour la multiplicité d'un nœud
+update_knot_multiplicity <- function(idx, new_mult) {
+  if (is.null(values$knot_metadata)) return()
+  if (idx < 1 || idx > nrow(values$knot_metadata)) return()
+
+  # Ne pas modifier les extrémités
+  if (idx == 1 || idx == nrow(values$knot_metadata)) {
+    showNotification("Cannot modify endpoint knots!", type = "warning")
+    return()
+  }
+
+  # Limiter la multiplicité
+  degree <- input$degree
+  new_mult <- max(1, min(new_mult, degree + 1))
+
+  # Mettre à jour les métadonnées
+  values$knot_metadata$multiplicity[idx] <- new_mult
+
+  # Reconstruire la séquence étendue
+  values$knot_extended <- build_knot_sequence(
+    values$knot_metadata$knot,
+    values$knot_metadata$multiplicity
+  )
+
+  # Garder le vecteur knot pour compatibilité
+  values$knot <- values$knot_metadata$knot
+
+  showNotification(paste("Knot", idx, "multiplicity set to", new_mult),
+                   type = "message")
+}
+
+# Augmenter la multiplicité
+observeEvent(input$inc_multiplicity, {
+  idx <- selected_knot()
+  if (is.null(idx)) {
+    showNotification("Select a knot first!", type = "warning")
+    return()
+  }
+
+  current_mult <- values$knot_metadata$multiplicity[idx]
+  update_knot_multiplicity(idx, current_mult + 1)
+})
+
+# Diminuer la multiplicité
+observeEvent(input$dec_multiplicity, {
+  idx <- selected_knot()
+  if (is.null(idx)) {
+    showNotification("Select a knot first!", type = "warning")
+    return()
+  }
+
+  current_mult <- values$knot_metadata$multiplicity[idx]
+  update_knot_multiplicity(idx, current_mult - 1)
+})
+
 }
 
 # Run app
