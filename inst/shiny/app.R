@@ -414,21 +414,21 @@ conditionalPanel(
           hr(),
 
           # Demos
-          fluidRow(
-            column(
-              12,
-              h5("Run Demos:"),
-              actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info"),
-              actionButton("demo_monot", "Monotonicity basic", class = "btn-sm btn-info"),
-              actionButton("demo_log", "Logistic", class = "btn-sm btn-info"),
-              actionButton("demo_temp", "Temperature", class = "btn-sm btn-info"),
-              actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info"),
-              actionButton("demo_conv", "Convexity", class = "btn-sm btn-info"),
-              actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info"),
-              actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info"),
-              actionButton("demo_der3", "Third derivative", class = "btn-sm btn-info")
-            )
-          ),
+          # fluidRow(
+          #   column(
+          #     12,
+          #     h5("Run Demos:"),
+          #     actionButton("demo_comp", "Comprehensive", class = "btn-sm btn-info"),
+          #     actionButton("demo_monot", "Monotonicity basic", class = "btn-sm btn-info"),
+          #     actionButton("demo_log", "Logistic", class = "btn-sm btn-info"),
+          #     actionButton("demo_temp", "Temperature", class = "btn-sm btn-info"),
+          #     actionButton("demo_temp2", "Temperature2", class = "btn-sm btn-info"),
+          #     actionButton("demo_conv", "Convexity", class = "btn-sm btn-info"),
+          #     actionButton("demo_degrees", "Degrees", class = "btn-sm btn-info"),
+          #     actionButton("demo_derivative", "Derivative", class = "btn-sm btn-info"),
+          #     actionButton("demo_der3", "Third derivative", class = "btn-sm btn-info")
+          #   )
+          # ),
           div(
             id = "demo_area",
             style = "display: none; margin-top: 10px;",
@@ -1927,6 +1927,9 @@ server <- function(input, output, session) {
     if (is.null(constraints)) {
       return("# Error: constraints not defined")
     }
+    mult_knot<-build_knot_sequence(
+      values$knot_metadata$knot,
+      values$knot_metadata$multiplicity)
     paste0(
       "library(BsplineQuantReg)\n\n",
       "x <- c(",
@@ -1936,9 +1939,11 @@ server <- function(input, output, session) {
       paste(round(values$ytab, 4), collapse = ", "),
       ")\n",
       "knot <- c(",
-      paste(round(values$knot, 4), collapse = ", "),
+      paste(round(mult_knot, 4), collapse = ", "),
+      #paste(round(values$knot, 4), collapse = ", "),
       ")\n\n",
-      "fitted <- quantile_spline(x, y, knot,\n",
+      "fitted <- quantile_spline(x, y,\n",
+      "                        knot=knot",
       "                       tau = ",
       input$tau,
       ",\n",
@@ -2172,8 +2177,8 @@ server <- function(input, output, session) {
       }
 
       # Points d'évaluation (avec une marge)
-      x_min <- min(knot) - 0.1 * diff(range(knot))
-      x_max <- max(knot) + 0.1 * diff(range(knot))
+      x_min <- min(knot) - 0.02 * diff(range(knot))
+      x_max <- max(knot) + 0.02* diff(range(knot))
       x_eval <- seq(x_min, x_max, length.out = 300)
 
       # Stocker
