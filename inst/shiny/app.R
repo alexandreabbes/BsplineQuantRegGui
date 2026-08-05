@@ -155,6 +155,7 @@ ui <- fluidPage(
         3,
         actionButton("clear_knots", "Clear \n manual knots", class = "btn-sm btn-danger")
       )),
+      column(6, actionButton("remove_knot", "Remove selected knot", class = "btn-sm btn-danger")),
       br(),
 
       fluidRow(sliderInput(
@@ -387,25 +388,21 @@ ui <- fluidPage(
           ),
 ####info about knots
 # Dans la colonne des contrôles, sous "Constraints" ou "Execution"
-conditionalPanel(
-  condition = "output.selected_knot_display != 'No knot selected'",
-  h5("Selected Knot:"),
-  verbatimTextOutput("selected_knot_display", placeholder = TRUE)
-),
           h5("Selected Knot:"),
 
           verbatimTextOutput("selected_knot_display", placeholder = TRUE),
-          # Dans l'UI, sous "Execution" ou dans un nouvel onglet "Knots"
+
           conditionalPanel(
             condition = "output.selected_knot_display != 'No knot selected'",
-            h5("Knot Multiplicity:"),
+
+                     h5("Knot Multiplicity:") ,
             fluidRow(
               column(6, actionButton("inc_multiplicity", "+", class = "btn-sm btn-primary")),
               column(6, actionButton("dec_multiplicity", "-", class = "btn-sm btn-warning"))
             ),
             br(),
             fluidRow(
-              column(6, actionButton("remove_knot", "Remove knot", class = "btn-sm btn-danger")),
+              column(6, actionButton("remove_knot", "Remove selected knot", class = "btn-sm btn-danger")),
               column(6, actionButton("reset_multiplicity", "Reset", class = "btn-sm btn-info"))
             ),
             p("Multiplicity: m=1 (C²), m=2 (C¹), m=3 (C⁰), m=4 (Discontinuity)")
@@ -521,47 +518,29 @@ conditionalPanel(
               fluidRow(
                 column(
                   3,
-                  h4("Basis Parameters"),
-                  p("Using current spline configuration:"),
-                  p(strong("Degree:"), textOutput("basis_degree_display", inline = TRUE)),
-                  p(strong("Knots:"), textOutput("basis_knot_count_display", inline = TRUE)),
+
+
 
                   hr(),
                   h4("Derivative"),
                   sliderInput("basis_derivative", "Derivative order:",
                               min = 0, max = 4, value = 0, step = 1),
-
                   hr(),
-                  h4("Knot Multiplicity"),
-                  p("Click on a knot in the plot to select it."),
-                  p("Then use the buttons below to adjust multiplicity:"),
-                  p("m=1: C², m=2: C¹, m=3: C⁰, m=4: Discontinuity"),
+                  h4("Display"),
+                  checkboxInput("basis_show_knots", "Show knots", value = TRUE),
+                  checkboxInput("basis_show_multiplicity", "Show multiplicity labels", value = TRUE),
+                  actionButton("basis_update", "Update Basis",
+                               class = "btn-primary btn-block"),
+                  checkboxInput("consider_multiplicity","Consider Multiplicity",TRUE),
 
-                  fluidRow(
-                    column(6, actionButton("basis_inc_multiplicity", "Increase m",
-                                           class = "btn-sm btn-primary", style = "width:100%;")),
-                    column(6, actionButton("basis_dec_multiplicity", "Decrease m",
-                                           class = "btn-sm btn-warning", style = "width:100%;"))
-                  ),
-                  br(),
-                  actionButton("basis_remove_knot", "Remove selected knot",
-                               class = "btn-sm btn-danger", style = "width:100%;"),
-                  br(), br(),
-                  actionButton("basis_reset_knots", "Reset multiplicities",
-                               class = "btn-sm btn-info", style = "width:100%;"),
 
                   hr(),
                   h4("Knot Multiplicities"),
                   verbatimTextOutput("basis_multiplicity_info", placeholder = TRUE),
 
-                  hr(),
-                  h4("Display"),
-                  checkboxInput("basis_show_knots", "Show knots", value = TRUE),
-                  checkboxInput("basis_show_multiplicity", "Show multiplicity labels", value = TRUE),
 
                   hr(),
-                  actionButton("basis_update", "Update Basis",
-                               class = "btn-primary btn-block")
+
                 ),
                 column(
                   9,
@@ -1061,40 +1040,55 @@ server <- function(input, output, session) {
 
   build_constraints <- function() {
     degree <- input$degree
-    kn <- length(values$knot) - 1
+
+    # Déterminer le nombre de nœuds
+    if (!is.null(values$knot_metadata) && input$consider_multiplicity) {
+      mult_knot <- build_knot_sequence(
+        values$knot_metadata$knot,
+        values$knot_metadata$multiplicity
+      )
+      kn <- length(mult_knot) - 2 * degree
+    } else {
+      if (is.null(values$knot)) {
+        showNotification("No knots available!", type = "warning")
+        return(NULL)
+      }
+      kn <- length(values$knot) - 1
+    }
 
     if (kn < 1) {
       showNotification("Not enough knots!", type = "warning")
       return(NULL)
     }
 
-    safe_repeat <- function(val, len) {
-      if (length(val) == 1) {
-        return(rep(as.numeric(val), len))
-      }
-      v <- as.numeric(val)
-      if (length(v) > len)
-        return(v[1:len])
-      if (length(v) < len)
-        return(c(v, rep(0, len - length(v))))
-      return(v)
-    }
-
+    # Contraintes uniformes
     if (input$constraint_mode == "uniform") {
-      monot <- input$monot
-      conv <- input$conv
-      der3 <- input$der3
+      monot_val <- as.numeric(input$monot)
+      conv_val <- as.numeric(input$conv)
+      der3_val <- as.numeric(input$der3)
+
+      if (is.na(monot_val)) monot_val <- 0
+      if (is.na(conv_val)) conv_val <- 0
+      if (is.na(der3_val)) der3_val <- 0
+
+      monot <- rep(monot_val, kn)
+      conv <- rep(conv_val, kn + 1)
+      der3 <- rep(der3_val, kn + 1)
+
+      if (degree < 3) der3 <- rep(0, kn + 1)
+
     } else {
+      # Mode région
       monot <- rep(0, kn)
       conv <- rep(0, kn + 1)
       der3 <- rep(0, kn + 1)
+
       for (region in values$regions) {
         for (i in 1:kn) {
           x1 <- values$knot[i]
           x2 <- values$knot[i + 1]
           if (x2 > region$xmin && x1 < region$xmax) {
-            if (region$monot != 0)
-              monot[i] <- region$monot
+            if (region$monot != 0) monot[i] <- region$monot
             if (region$conv != 0) {
               conv[i] <- region$conv
               conv[i + 1] <- region$conv
@@ -1106,33 +1100,13 @@ server <- function(input, output, session) {
         }
       }
     }
-    # Dans build_constraints(), pour les contraintes uniformes
-    if (input$constraint_mode == "uniform") {
-      # S'assurer que les valeurs sont numériques
-      monot_val <- as.numeric(input$monot)
-      conv_val <- as.numeric(input$conv)
-      der3_val <- as.numeric(input$der3)
 
-      # Remplacer NA par 0
-      if (is.na(monot_val))
-        monot_val <- 0
-      if (is.na(conv_val))
-        conv_val <- 0
-      if (is.na(der3_val))
-        der3_val <- 0
-
-      monot <- rep(monot_val, kn + 1)
-      conv <- rep(conv_val, kn + 1) # débordre pour le degre 2
-      der3 <- rep(der3_val, kn + 1) # débordre pour le degre 3
-    }
-    if (degree < 3)
-      der3 <- rep(0, kn + 1)
-
-    list(monot = monot,
-         conv = conv,
-         der3 = der3)
+    list(
+      monot = monot,
+      conv = conv,
+      der3 = der3
+    )
   }
-
   # ============ CSV IMPORT ============
 
   observeEvent(input$load_csv, {
@@ -1279,15 +1253,21 @@ server <- function(input, output, session) {
       # Vérifier la version de BsplineQuantReg
       version <- packageVersion("BsplineQuantReg")
       #Extended knot sequence with interior multiplicities (regularity control)
-      mult_knot<-build_knot_sequence(
+      if (input$consider_multiplicity)
+        {mult_knot<-build_knot_sequence(
         values$knot_metadata$knot,
         values$knot_metadata$multiplicity)
+        lm<-length(mult_knot)
+        knot<-mult_knot[(input$degree+1):(lm-input$degree)]}
+      else{
+        knot<-as.vector(values$knot)
+      }
 
       # Paramètres communs
       args <- list(
         as.vector(values$xtab),
         as.vector(values$ytab),
-        knot=mult_knot, #as.vector(values$knot),
+        knot=knot, #
         tau = input$tau,
         degree = as.numeric(input$degree),
         monot = constraints$monot,
@@ -2139,15 +2119,18 @@ server <- function(input, output, session) {
       degree <- input$degree
 
       # Utiliser la séquence étendue avec multiplicités
-      if (!is.null(values$knot_extended) && length(values$knot_extended) > 0) {
-        sn <- values$knot_extended
-      } else if (!is.null(values$knot)) {
+      if (!is.null(values$knot)) {
         # Fallback: construire manuellement
         knot <- values$knot
-        #sn <- c(rep(knot[1], degree), knot, rep(rev(knot)[1], degree))
+
+        if (input$consider_multiplicity){
         sn<-build_knot_sequence(
           values$knot_metadata$knot,
-          values$knot_metadata$multiplicity)
+          values$knot_metadata$multiplicity)}
+
+        else {# Construire la séquence de nœuds étendus pour Bspline_base
+          # Les extrémités doivent apparaître degree+1 fois pour les B-splines
+          sn <- c(rep(knot[1], degree), knot, rep(rev(knot)[1], degree))}
       } else {
         showNotification("No knots available", type = "warning")
         return()
@@ -2159,14 +2142,8 @@ server <- function(input, output, session) {
       knot <- values$knot
       log_console(paste("Basis knots:", paste(round(knot, 4), collapse = ", ")))
 
-      # Construire la séquence de nœuds étendus pour Bspline_base
-      # Les extrémités doivent apparaître degree+1 fois pour les B-splines
-      #sn <- c(rep(knot[1], degree), knot, rep(rev(knot)[1], degree))
-      build_knot_sequence(
-        values$knot_metadata$knot,
-        values$knot_metadata$multiplicity)
-      # Construire la base
-      basis_obj <- Bspline_base(sn, degree = degree, verbose = FALSE)
+
+
 
       # Dériver si nécessaire
       der <- input$basis_derivative
