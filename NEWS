@@ -1,7 +1,9 @@
-### BsplineQuantRegGui 0.1.1
+### BsplineQuantRegGui 0.2.0
 ###Changes
 - add basis view tab
-- add knot multiplicity management
+- add knot multiplicity management compatible with global
+constraints and basis view
+- improve  knots managenemt (removing, adding)
 
 
 # BsplineQuantRegGui 0.1.0
