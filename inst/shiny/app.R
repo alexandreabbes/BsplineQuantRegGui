@@ -395,15 +395,15 @@ ui <- fluidPage(
           conditionalPanel(
             condition = "output.selected_knot_display != 'No knot selected'",
 
-                     h5("Knot Multiplicity:") ,
-            fluidRow(
+            checkboxInput("consider_multiplicity","Consider Multiplicity",TRUE),
+             h5("Knot Multiplicity:") ,
               column(6, actionButton("inc_multiplicity", "+", class = "btn-sm btn-primary")),
-              column(6, actionButton("dec_multiplicity", "-", class = "btn-sm btn-warning"))
-            ),
+              column(6, actionButton("dec_multiplicity", "-", class = "btn-sm btn-warning")),
+
             br(),
             fluidRow(
               column(6, actionButton("remove_knot", "Remove selected knot", class = "btn-sm btn-danger")),
-              column(6, actionButton("reset_multiplicity", "Reset", class = "btn-sm btn-info"))
+              column(6, actionButton("reset_multiplicity", "Reset multiplicity", class = "btn-sm btn-info"))
             ),
             p("Multiplicity: m=1 (C²), m=2 (C¹), m=3 (C⁰), m=4 (Discontinuity)")
           ),
@@ -845,46 +845,32 @@ server <- function(input, output, session) {
 
   # ============ KNOTS ============
 
-  observe({
-    if (!is.null(values$xtab) && length(values$manual_knot) == 0) {
-      if (!is.na(input$auto_knot_count)) {
-        kn <- max((input$auto_knot_count), 2) - 1
+  observeEvent(c(input$auto_knot_count, input$degree, input$generate_custom), {
+    req(values$xtab)
+    req(input$auto_knot_count >= 2)
 
-        # Générer les nœuds quantiles
-        knot_values <- quantile(values$xtab, probs = ((0:(kn)) / (kn)))
+    # Ne pas écraser les nœuds manuels
+    if (length(values$manual_knot) > 0) return()
 
-        # Multiplicités initiales
-        degree <- input$degree
-        mult <- rep(1, length(knot_values))
-        mult[1] <- degree + 1
-        mult[length(mult)] <- degree + 1
+    kn <- max(input$auto_knot_count, 2) - 1
+    auto_knot_values <- quantile(values$xtab, probs = seq(0, 1, length.out = kn + 1))
 
-        # Stocker
-        values$knot <- knot_values
-        values$knot_metadata <- data.frame(
-          knot = knot_values,
-          multiplicity = mult,
-          is_manual = FALSE,
-          stringsAsFactors = FALSE
-        )
+    degree <- input$degree
+    list_knot <- auto_knot_values
+    mult <- rep(1, length(list_knot))
+    mult[1] <- degree + 1
+    mult[length(mult)] <- degree + 1
 
-        # Construire la séquence étendue pour la base B-spline
-        values$knot_extended <- build_knot_sequence(knot_values, mult)
-      }
-    }
-  })
-  output$knots_compact <- renderPrint({
-    if (!is.null(values$knot) && length(values$knot) > 0) {
-      k <- round(values$knot, 3)
-      if (length(k) <= 8) {
-        cat(paste(k, collapse = ", "))
-      } else {
-        cat(paste(c(head(k, 4), "...", tail(k, 4)), collapse = ", "))
-      }
-    } else {
-      cat("(none)")
-    }
-  })
+    values$knot <- sort(c(list_knot,input$manual_knot))
+    values$knot_metadata <- data.frame(
+      knot = list_knot,
+      multiplicity = mult,
+      is_manual = FALSE,
+      stringsAsFactors = FALSE
+    )
+    values$knot_extended <- build_knot_sequence(list_knot, mult)
+
+  }, ignoreNULL = TRUE, ignoreInit = FALSE)
   output$knots_compact <- renderPrint({
     if (!is.null(values$knot) && length(values$knot) > 0) {
       k <- round(values$knot, 3)
@@ -907,6 +893,7 @@ server <- function(input, output, session) {
     }
   })
 
+  #observeEvent(remove_k)
   observeEvent(event_data("plotly_click", source = "plot"), {
     if (values$adding_knot) {
       click <- event_data("plotly_click", source = "plot")
@@ -915,7 +902,7 @@ server <- function(input, output, session) {
         if (x > min(values$xtab) && x < max(values$xtab)) {
           if (!any(abs(values$knot - x) < 1e-6)) {
             values$manual_knot <- sort(c(values$manual_knot, x))
-            values$knot <- sort(c(values$auto_knot_list, values$manual_knot))
+            values$knot <- sort(c(values$knot, values$manual_knot))
             showNotification(paste("Knot added at x =", round(x, 3)), type = "message")
           } else {
             showNotification("This knot already exists", type = "warning")
@@ -926,6 +913,10 @@ server <- function(input, output, session) {
       }
     }
   })
+  observeEvent(input$remove_knot,
+               {idx <- selected_knot()
+               if (!is.na(idx)){ values$knot<-values$knot[-idx] }
+               })
 
   observeEvent(input$clear_knots, {
     values$manual_knot <- vector()
@@ -2353,21 +2344,21 @@ observeEvent(input$dec_multiplicity, {
 
 # Construire la séquence de nœuds avec multiplicités
 build_knot_sequence <- function(knots, multiplicities) {
-  # knots: vecteur des nœuds uniques
-  # multiplicities: vecteur des multiplicités (même longueur)
-
-  if (length(knots) != length(multiplicities)) {
+  # Vérifier les entrées
+  if (is.null(knots) || length(knots) == 0) {
+    return(c())
+  }
+  if (is.null(multiplicities) || length(multiplicities) != length(knots)) {
     stop("knots and multiplicities must have same length")
   }
 
-  # Construire la séquence étendue
   knot_seq <- c()
   for (i in seq_along(knots)) {
     knot_seq <- c(knot_seq, rep(knots[i], multiplicities[i]))
   }
-
   return(knot_seq)
 }
+
 
 # Initialiser les nœuds avec multiplicités
 init_knots <- function(xtab, n_knots) {
@@ -2440,7 +2431,12 @@ observeEvent(input$dec_multiplicity, {
   current_mult <- values$knot_metadata$multiplicity[idx]
   update_knot_multiplicity(idx, current_mult - 1)
 })
-
+#reset la multiplicite
+observeEvent(input$reset_multiplicity, {
+  kn=length(values$knot)
+  for (idx in 2:(kn-1)){
+    update_knot_multiplicity(idx, 1)}
+})
 }
 
 # Run app
