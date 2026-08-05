@@ -389,25 +389,21 @@ ui <- fluidPage(
 ####info about knots
 # Dans la colonne des contrôles, sous "Constraints" ou "Execution"
           h5("Selected Knot:"),
-
           verbatimTextOutput("selected_knot_display", placeholder = TRUE),
+conditionalPanel(
+  condition = "output.selected_knot_display != 'No knot selected'",
 
-          conditionalPanel(
-            condition = "output.selected_knot_display != 'No knot selected'",
+  checkboxInput("consider_multiplicity", "Consider Multiplicity", value = TRUE),
 
-            checkboxInput("consider_multiplicity","Consider Multiplicity",TRUE),
-             h5("Knot Multiplicity:") ,
-              column(6, actionButton("inc_multiplicity", "+", class = "btn-sm btn-primary")),
-              column(6, actionButton("dec_multiplicity", "-", class = "btn-sm btn-warning")),
 
-            br(),
-            fluidRow(
-              column(6, actionButton("remove_knot", "Remove selected knot", class = "btn-sm btn-danger")),
-              column(6, actionButton("reset_multiplicity", "Reset multiplicity", class = "btn-sm btn-info"))
-            ),
-            p("Multiplicity: m=1 (C²), m=2 (C¹), m=3 (C⁰), m=4 (Discontinuity)")
-          ),
-
+  h5("Change Knot Multiplicity:"),
+    column(6, actionButton("inc_multiplicity", "+", class = "btn-sm btn-primary"),
+     actionButton("dec_multiplicity", "-", class = "btn-sm btn-warning"),
+  actionButton("reset_multiplicity", "Reset multiplicity", class = "btn-sm btn-info"),
+  p("Multiplicity: m, Degree: d => regularity C^{d-m-1}"),
+  column(3, actionButton("remove_knot", "Remove selected knot", class = "btn-sm btn-danger")),
+),
+),
           hr(),
 
           # Demos
