@@ -32,7 +32,7 @@ RUN R -e "remotes::install_version('CVXR', version = '1.9.1', repos = 'https://c
 #RUN R -e "remotes::install_version('BsplineQuantReg', repos = 'https://cloud.r-project.org/', version='0.2.2', upgrade='never')"
 
 #depuis Github
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'with_quartic', upgrade='never')"
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'with_quartic',version='0.2.4', upgrade='never')"
 
 RUN R -e " packageVersion('BsplineQuantReg') "
 
