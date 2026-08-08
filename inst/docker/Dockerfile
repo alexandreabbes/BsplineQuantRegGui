@@ -32,12 +32,12 @@ RUN R -e "remotes::install_version('CVXR', version = '1.9.1', repos = 'https://c
 #RUN R -e "remotes::install_version('BsplineQuantReg', repos = 'https://cloud.r-project.org/', version='0.2.2', upgrade='never')"
 
 #depuis Github
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'with_quartic', upgrade='never')"
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantReg', ref = 'with_quartic', upgrade='never', version='0.2.4')"
 
 RUN R -e " packageVersion('BsplineQuantReg') "
 
 # Installer BsplineQuantRegGui (pour les dépendances)
-RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui', ref = 'main')"
+RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui', ref = 'main3', version='0.2.0')"
 
 # Copier le code source dans le conteneur
 COPY . /app
@@ -46,3 +46,4 @@ EXPOSE 3838
 
 # Lancer Shiny directement depuis le dossier copié
 CMD ["R", "-e", "shiny::runApp('/app/inst/shiny', host='0.0.0.0', port=3838)"]
+CMD ["R", "-e", "library BsplineQuantRegGui; run-gui()"]
