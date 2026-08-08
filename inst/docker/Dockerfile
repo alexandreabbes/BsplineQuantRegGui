@@ -40,10 +40,10 @@ RUN R -e " packageVersion('BsplineQuantReg') "
 RUN R -e "remotes::install_github('alexandreabbes/BsplineQuantRegGui', ref = 'main3', version='0.2.0')"
 
 # Copier le code source dans le conteneur
-COPY . /app
+#COPY . /app
 
 EXPOSE 3838
 
 # Lancer Shiny directement depuis le dossier copié
-CMD ["R", "-e", "shiny::runApp('/app/inst/shiny', host='0.0.0.0', port=3838)"]
-CMD ["R", "-e", "library BsplineQuantRegGui; run-gui()"]
+#CMD ["R", "-e", "shiny::runApp('/app/inst/shiny', host='0.0.0.0', port=3838)"]
+CMD ["R", "-e", "library(BsplineQuantRegGui); run_gui()"]
